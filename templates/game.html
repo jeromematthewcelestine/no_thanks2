@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Game State</title>
+    <script src="https://unpkg.com/react@17.0.2/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone/babel.min.js"></script>
+    <script>
+      let game_id = {{game_id}};
+    </script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

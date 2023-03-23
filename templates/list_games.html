@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>List of Games</title>
+</head>
+<body>
+	<h1>List of Games</h1>
+	<p>Welcome, {{ nickname }}! (<a href="{{ url_for('logout') }}">log out</a>)
+	<ul>
+		{% for game in games %}
+		<li><a href="{{ url_for('game_template', game_id=game.id) }}">Game {{ game.id }}, {{ game.username }}</a></li>
+		{% endfor %}
+	</ul>
+	<form action="{{ url_for('new_game') }}" method="get">
+		<button type="submit">New Game</button>
+	</form>
+</body>
+</html>

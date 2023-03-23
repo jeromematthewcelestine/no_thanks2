@@ -1,0 +1,123 @@
+* {
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #f2f2f2;
+}
+
+/* Styling for the player area */
+.player {
+    border: 0px solid black;
+    padding: 5px;
+    margin: 10px;
+    display: flex;
+    
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+/* Styling for the player name */
+.player-name {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: left;
+}
+
+.player-cards {
+	margin-left: 0px;
+	padding: 0px;
+}
+
+/* Styling for the card */
+.card {
+    border: 1px solid black;
+    border-radius: 8px;
+    width: 50px;
+    height: 70px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-right: 5px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 0px;
+}
+
+.card-empty {
+    border: 1px dashed black;
+}
+
+.chips-counter {
+    border: 1px solid black;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: orangered;
+    justify-content: center;
+    align-items: center;
+    margin: 20px;
+    display: inline-flex;
+    font-weight: bold;
+}
+
+.score-counter {
+    border: 1px solid black;
+    width: 40px;
+    height: 40px;
+    background-color: lightyellow;
+    justify-content: center;
+    align-items: center;
+    margin: 20px;
+    display: inline-flex;
+    font-weight: bold;
+}
+
+
+
+.commonArea {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+
+.deck {
+    margin: 0px 40px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.deck .card {
+    background-color: white;
+    border: 1px solid black;
+    margin: 10px -22px;
+    font-weight: normal;
+    font-size: 18px;
+    font-style: italic;
+}
+
+.player .card.last-chosen {
+    /* border: 2px solid yellow; */
+    box-shadow: 0px 0px 5px red;
+}
+
+.container {
+    display:grid;
+    grid-template-columns: 100fr 300px;
+}
+
+.gameArea {
+    grid-column: 1;
+}
+.logArea {
+    grid-column: 2;
+}
