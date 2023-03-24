@@ -1,3 +1,39 @@
+class PlayerTurnBanner extends React.Component {
+  render() {
+    const { game_state, active_player_id, makeMove, newGame } = this.props;
+    const activePlayer = game_state.players.find(player => player.id === active_player_id);
+    const playerName = activePlayer.id === 0 ? activePlayer.name : `Player ${activePlayer.id}`;
+    const isHumanPlayer = activePlayer.id === 0;
+    const isGameOver = game_state.is_game_over;
+    let winnerName;
+    if (isGameOver) {
+      winnerName = game_state.players.find(player => player.final_status === "winner").name;
+    }
+
+    return (
+      <div className="player-turn-banner">
+        {isGameOver ? (
+          <div>Game over. {winnerName} wins!{" "}
+            <button className="banner-button" onClick={() => newGame()}>New Game</button>
+          </div>
+        ) : isHumanPlayer ? (
+          <div>
+            {playerName}, it is your turn. You must{" "}
+            <button className="banner-button" onClick={() => makeMove('PAY_CHIP')}>PASS</button> or{" "}
+            <button className="banner-button" onClick={() => makeMove('TAKE_CARD')}>TAKE CARD</button>.
+          </div>
+        ) : (
+          <div>It is {playerName}'s turn.</div>
+        )}
+      </div>
+    );
+  }
+}
+
+
+
+
+
 class GameLog extends React.Component {
 
   render() {
@@ -66,9 +102,9 @@ class PlayerInfo extends React.Component {
     });
 
     return (
-      <div className="player">
-        <div className="player-info">
-          <div className="player-name">{(player.id == 0) ? (player.name) : "Player "+player.id}</div>
+      <div className={`player${is_active ? ' active-player' : ''}`}>
+        <div className={`player-info${is_active ? ' active-player' : ''}`}>
+          <div className={`player-name${is_active ? ' active-player' : ''}`}>{(player.id == 0) ? (player.name) : "Player "+player.id}</div>
           <div className="score-counter">{player.score} {(player.final_status=="winner"?"*":"")}</div>
           <div className="chips-counter">{(player.id == 0) ? player.chips : "??"}</div>
         </div>
@@ -131,12 +167,15 @@ class GameState extends React.Component {
     await this.requestNext()
   }
 
+  async newGame() {
+    window.location.href = "/new-game";
+  }
+
   async componentDidMount() {
     // Fetch the initial game state from the server
     const response1 = await fetch(`/game-state/${game_id}`);
     const { game_state } = await response1.json();
     this.setState({ game_state: game_state, active_player_id: game_state.active_player_id });
-    // console.log("active_player_id", this.state.active_player_id)
 
     const response2 = await fetch(`/game-state/${game_id}/player/${game_state.active_player_id}`);
     const { game_state: game_state2, legal_actions: legal_actions } = await response2.json();
@@ -157,37 +196,25 @@ class GameState extends React.Component {
 
     return (
       <div className="container">
-        <h1 align="center"> </h1>
         <div className="gameArea">
-          <CommonArea game_state={game_state} />
+          <div className="gameWrapper">
           
-          {playerInfos}
+            <PlayerTurnBanner
+              game_state={game_state} 
+              active_player_id={active_player_id}
+              makeMove={this.makeMove.bind(this)}
+              newGame={this.newGame.bind(this)} />
           
-          {game_state.is_game_over &&
-            <div>
-              <p>Game over.</p>
-            </div>}
-          {!game_state.is_game_over && active_player_id == 0 && legal_actions &&
-            <div>
-              <p>It is your turn.</p>
-              <button onClick={() => this.makeMove('TAKE_CARD')} disabled={!legal_actions.includes('TAKE_CARD')}>Take Card</button>
-              <button onClick={() => this.makeMove('PAY_CHIP')} disabled={!legal_actions.includes('PAY_CHIP')}>Pay Chip</button>
-            </div>}
-          {!game_state.is_game_over && active_player_id != 0 &&
-            <div>
-              <p>It is Player {active_player_id}'s turn.</p>
-              <button onClick={() => this.requestNext()}>Next</button>
+            <CommonArea game_state={game_state} />
+          
+            {playerInfos}
+          
+            <div className="bottomButtons">
+              <button className="bottom-button" onClick={() => this.resign()}>Resign</button>
             </div>
-          }
-          <div>
-            <button onClick={() => this.resign()}>Resign</button>
           </div>
-          </div>
-          
-          <div className="logArea">
-            <GameLog game_state={game_state}/>
-          </div>
-          
+        
+        </div>
       </div>
     );
   }

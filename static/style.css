@@ -9,13 +9,44 @@ body {
     background-color: #fff;
 }
 
+h1 {
+    font-family: monospace;
+}
+
+.header {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    color: white;
+    display: grid;
+    grid-template-columns: 50% 50%;
+    width: 100%;
+    background-color: black;
+    padding: 5px;
+    margin: 0px 0px 15px 0px;
+}
+.header-left {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 18pt;
+    grid-column: 1;
+    text-align: left;
+}
+.header-right {
+    grid-column: 2;
+
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    flex-direction: row-reverse;
+    height: 100%;
+    align-items: center;
+}
+
+
 .banner {
     font-family:Verdana, Geneva, Tahoma, sans-serif;
     font-weight: bold;
     color: white;
-    background-color: darkcyan;
+    background-color: black;
     width: 100%;
-    height: 50px;
     position: fixed;
     top: 0;
     left: 0;
@@ -26,18 +57,15 @@ body {
 
 /* Styling for the player area */
 .player {
-    border: 0px solid black;
+    border: 1px dashed gray;
+    border-radius: 8px;
     padding: 5px;
     margin: 10px;
-    display: grid;
-
-    
-    /* 
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: flex-start;
-    align-items: center; */
+    align-items: center;
 }
 
 .player-info {
@@ -48,15 +76,22 @@ body {
     align-items: center;
 }
 
+.active-player {
+    background-color: gold;
+    padding: 2px;
+    border-radius: 5px;
+  }
 
 .player-cards {
 	margin-left: 0px;
 	padding: 0px;
     grid-column: 2;
-    display: block;
-    /* flex-direction: row;
-    justify-content: flex-start;
-    align-items: center; */
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-self: start;
+    /* justify-content: flex-start; */
+    /* align-items: center; */
 }
 
 /* Styling for the player name */
@@ -90,6 +125,7 @@ body {
 
 .card-empty {
     border: 1px dashed black;
+    background: none;
 }
 
 .chips-counter {
@@ -116,8 +152,6 @@ body {
     display: inline-flex;
     font-weight: bold;
 }
-
-
 
 .commonArea {
     display: flex;
@@ -153,13 +187,65 @@ body {
 }
 
 .container {
-    display:grid;
-    grid-template-columns: 100fr 300px;
+    display: flex;
+    flex-direction: column;
 }
 
-.gameArea {
-    grid-column: 1;
+.player-turn-banner {
+    background-color: beige;
+    width: 100%;
+    padding: 10px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    z-index: 2;
+  }
+  
+  .banner-button {
+    background-color: slateblue;
+    border-radius: 5px;
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 0 5px;
+  }
+  
+  .banner-button:hover {
+    background-color: darkslateblue;
+  }
+
+  .gameWrapper {
+    display: flex;
+    flex-direction: column;
+  }
+  
+
+.gameArea { 
+    display: flex;
+    flex-direction: column;
 }
 .logArea {
     grid-column: 2;
 }
+.bottomButtons {
+    width: 100%;
+    display: flex;
+    justify-content: right;
+}
+
+.bottom-button {
+    background-color: lightgray;
+    border-radius: 5px;
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 0 5px;
+}
+
+.bottom-button:hover {
+    background-color: darkgray;
+  }

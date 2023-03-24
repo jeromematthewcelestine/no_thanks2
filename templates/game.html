@@ -12,7 +12,14 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <div class="banner">NoThanksAI</div>
+  <div class="header">
+    <div class="header-left">
+      NoThanksAI
+    </div>
+    <div class="header-right">
+      new game | about | rules 
+    </div>
+  </div>
   <div id="root"></div>
   <script type="text/babel" src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
