@@ -9,4 +9,12 @@ Home page
 Load page starts a new game -- no username required.
 Home page - 
 - Check if game in session. If so, load game. If not, show new game creation screen.
+- Resign button
+- When game is over, add link to game creation screen
+- High scores / stats screen
+- Fix CSS
+- Grid layout for players
+- Card backs
+- Card fronts (number in top corner, place cards on top)
+- 
 
