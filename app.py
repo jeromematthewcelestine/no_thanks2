@@ -9,10 +9,12 @@ sys.path.append("..")
 sys.path.append("../mcts_no_thanks")
 from MCTSPlayer import MCTSPlayer
 
-mcts_player = MCTSPlayer(thinking_time = 1, filepath = "../mcts_no_thanks/mcts_classic_3p_20230221_05.model")
-print(mcts_player.n_players)
-print(mcts_player.C)
-print(len(mcts_player.plays))
+
+
+mcts_player_3p = MCTSPlayer(thinking_time = 1, filepath = "../mcts_no_thanks/mcts_classic_3p_20230221_05.model")
+print(mcts_player_3p.n_players)
+print(mcts_player_3p.C)
+print(len(mcts_player_3p.plays))
 
 app = Flask(__name__)
 app.secret_key = 'md3yTHuujFsD7En72cQP'
@@ -30,7 +32,7 @@ class Game(db.Model):
     username = db.Column(db.Text)
     status = db.Column(db.Text)
 
-def initialize_game():
+def initialize_game(player_name = "Bob", num_opponents = 3):
 
     deck = list(range(3, 33))
     random.shuffle(deck)
@@ -43,12 +45,12 @@ def initialize_game():
     print("len omitted_cards", len(omitted_cards))
     table_card = deck.pop()
     
-    players = [
-        {"id": 0, "type": "human", "name": "Jerome", "cards": [], "chips": start_chips},
-        {"id": 1, "type": "ai01", "name": "Player 2", "cards": [], "chips": start_chips},
-        {"id": 2, "type": "ai01", "name": "Player 3", "cards": [], "chips": start_chips},
-        # {"id": 3, "type": "ai01", "name": "Player 4", "cards": [], "chips": start_chips},
-    ]
+    human_player = {"id": 0, "type": "human", "name": player_name, "cards": [], "chips": start_chips}
+    players = [human_player]
+    for i in range(num_opponents):
+        ai_player = {"id": i+1, "type": "ai01", "name": f"Player {i+1}", "cards": [], "chips": start_chips}
+        players.append(ai_player)
+
     game_state = {
         "is_game_over": False,
         "active_player_id": 0,
@@ -65,51 +67,89 @@ def initialize_game():
     db.session.commit()
     return game.id
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        name = request.form['name']
-        session['name'] = name
-        return redirect(url_for('list_games'))
-    else:
-        return '''
-            <form method="post">
-                <label for="name">Choose a nickname:</label>
-                <input type="text" name="name" id="name">
-                <input type="submit" value="Submit">
-            </form>
-        '''
+
+# @app.route('/login', methods=['GET', 'POST'])
+# def login():
+#     if request.method == 'POST':
+#         name = request.form['name']
+#         session['name'] = name
+#         return redirect(url_for('list_games'))
+#     else:
+#         return '''
+#             <form method="post">
+#                 <label for="name">Choose a nickname:</label>
+#                 <input type="text" name="name" id="name">
+#                 <input type="submit" value="Submit">
+#             </form>
+#         '''
 
 # Define the logout page
-@app.route('/logout')
-def logout():
-    session.pop('name', None)
-    return redirect(url_for('login'))
+# @app.route('/logout')
+# def logout():
+#     session.pop('name', None)
+#     return redirect(url_for('login'))
+
+@app.route('/list-games')
+def list_games():
+    games = Game.query.all()
+    return render_template('list_games.html', games=games)
 
 @app.route('/')
-def list_games():
+def home():
     # return ""
-    if "name" in session:
-        games = Game.query.all()
-        return render_template('list_games.html', games=games, nickname=session['name'])
-    else:
-        return redirect(url_for('login'))
 
-@app.route('/new-game/')
+    if "game_id" in session:
+        print("game_id in session")
+        print("session game_id", session["game_id"])
+        return redirect(url_for('game_template', game_id=session['game_id']))
+    else:
+        print("game id not in session")
+        return redirect(url_for('new_game'))
+    
+@app.route('/new-game')
 def new_game():
-    game_id = initialize_game()
-    return redirect(url_for('game_template', game_id=game_id))
+    return render_template('new_game.html')
+
+@app.route('/create-game/', methods = ['POST'])
+def create_game():
+    print("create game")
+    print(request.json)
+    game_id = initialize_game(player_name = request.json["player_name"],
+                              num_opponents = request.json["num_ai_players"])
+    session['game_id'] = game_id
+    return jsonify({"success": True, "game_id": game_id})
+    # return redirect(url_for('game_template', game_id=game_id))
 
 @app.route('/game/<game_id>')
 def game_template(game_id):
     return render_template('game.html', game_id = game_id)
 
+@app.route('/game/<game_id>/resign', methods = ['POST'])
+def game_resign(game_id):
+    game = Game.query.filter(Game.id == game_id).first()
+    game_state = json.loads(game.state)
+
+    if game.status == "active" and not game_state["is_game_over"]:
+        game_state["is_game_over"] = True
+        game_state["messages"].append("Resigned")
+        session.pop("game_id", None)
+
+        game.state = json.dumps(game_state)
+        game.status = "resigned"
+        
+        db.session.commit()
+        success = True
+    else:
+        success = False
+
+    return jsonify({"success": success, "game_state": game_state})
+
 @app.route('/game-state/<game_id>')
 def game_state(game_id):
     print(f"/game-state/{game_id}")
     game = Game.query.filter(Game.id == game_id).first()
-    if not game.username == session['name']:
-        return jsonify({'message': 'Not authorized.'}), 400
+    # if not game.username == session['name']:
+        # return jsonify({'message': 'Not authorized.'}), 400
 
     game_state = json.loads(game.state)
     print(game_state)
@@ -119,14 +159,6 @@ def game_state(game_id):
     print(jsonify(response))
     return jsonify(response)
     # return render_template('game.html', game_id = game_id)
-
-
-def get_legal_actions(game_state, active_player_id):
-    active_player = game_state["players"][active_player_id]
-    legal_actions = ["TAKE_CARD"]
-    if active_player["chips"] > 0:
-        legal_actions.append("PAY_CHIP")
-    return legal_actions
 
 
 
@@ -149,6 +181,83 @@ def game_state_for_player(game_id, player_id):
     }
     
     return jsonify(response)
+
+
+@app.route('/game/<game_id>/next', methods = ['GET'])
+def get_next(game_id):
+    print(f"/game/{game_id}/next")
+    game = Game.query.filter(Game.id == game_id).first()
+    game_state = json.loads(game.state)
+
+    active_player_id = game_state["active_player_id"]
+
+    if game_state["players"][active_player_id]["type"] == "human":
+        return jsonify({ "success": False, "game_state": game_state })
+    if game_state["is_game_over"]:
+        return jsonify({ "success": False, "game_state": game_state })
+    
+    legal_actions = get_legal_actions(game_state, active_player_id)
+
+    if (len(game_state["players"]) == 3):
+        mcts_state = create_mcts_state(game_state, active_player_id)
+        mcts_legal_actions = create_mcts_legal_actions(legal_actions)
+        mcts_action = mcts_player_3p.get_action(mcts_state, mcts_legal_actions)
+        mcts_to_action = {0: "TAKE_CARD", 1: "PAY_CHIP"}
+        action = mcts_to_action[mcts_action]
+    else:
+        action = random.choice(["TAKE_CARD", "PAY_CHIP"])
+
+    game_state = do_action(game_state, action)
+
+    game.state = json.dumps(game_state)
+    db.session.commit()
+
+    print(game_state)
+
+    return jsonify({ "success": True, "game_state": game_state })
+
+
+@app.route('/game/<game_id>/action', methods = ['POST'])
+def game_action(game_id):
+    print(f"/game/{game_id}/action")
+    game = Game.query.filter(Game.id == game_id).first()
+    game_state = json.loads(game.state)
+
+    active_player_id = game_state["active_player_id"]
+    is_game_over = game_state["is_game_over"]
+
+    action_player_id = request.json["action_player_id"]
+    action_type = request.json["action_type"]
+
+    legal_actions = get_legal_actions(game_state, active_player_id)
+    # print("legal: ", legal_actions)
+
+    if (action_player_id == active_player_id and 
+        action_type in legal_actions and 
+        not is_game_over):
+
+        game_state = do_action(game_state, action_type)
+
+        # game_state = do_computer_moves(game_state)
+
+        game.state = json.dumps(game_state)
+        db.session.commit()
+        response = { "success": True, "game_state": game_state }
+        
+    else:
+        response = { "success": False, "game_state": game_state }
+
+    print(response)
+
+    return jsonify(response)
+
+
+def get_legal_actions(game_state, active_player_id):
+    active_player = game_state["players"][active_player_id]
+    legal_actions = ["TAKE_CARD"]
+    if active_player["chips"] > 0:
+        legal_actions.append("PAY_CHIP")
+    return legal_actions
 
 def check_winner(game_state):
     winner = None
@@ -231,70 +340,6 @@ def do_action(game_state, action_type):
 
     return game_state
 
-@app.route('/game/<game_id>/next', methods = ['GET'])
-def get_next(game_id):
-    print(f"/game/{game_id}/next")
-    game = Game.query.filter(Game.id == game_id).first()
-    game_state = json.loads(game.state)
-
-    active_player_id = game_state["active_player_id"]
-
-    if game_state["players"][active_player_id]["type"] == "human":
-        return jsonify({ "success": False, "game_state": game_state })
-    if game_state["is_game_over"]:
-        return jsonify({ "success": False, "game_state": game_state })
-    
-    legal_actions = get_legal_actions(game_state, active_player_id)
-
-    mcts_state = create_mcts_state(game_state, active_player_id)
-    mcts_legal_actions = create_mcts_legal_actions(legal_actions)
-    mcts_action = mcts_player.get_action(mcts_state, mcts_legal_actions)
-    mcts_to_action = {0: "TAKE_CARD", 1: "PAY_CHIP"}
-    action = mcts_to_action[mcts_action]
-
-    game_state = do_action(game_state, action)
-
-    game.state = json.dumps(game_state)
-    db.session.commit()
-
-    print(game_state)
-
-    return jsonify({ "success": True, "game_state": game_state })
-
-
-@app.route('/game/<game_id>/action', methods = ['POST'])
-def game_action(game_id):
-    print(f"/game/{game_id}/action")
-    game = Game.query.filter(Game.id == game_id).first()
-    game_state = json.loads(game.state)
-
-    active_player_id = game_state["active_player_id"]
-    is_game_over = game_state["is_game_over"]
-
-    action_player_id = request.json["action_player_id"]
-    action_type = request.json["action_type"]
-
-    legal_actions = get_legal_actions(game_state, active_player_id)
-    # print("legal: ", legal_actions)
-
-    if (action_player_id == active_player_id and 
-        action_type in legal_actions and 
-        not is_game_over):
-
-        game_state = do_action(game_state, action_type)
-
-        # game_state = do_computer_moves(game_state)
-
-        game.state = json.dumps(game_state)
-        db.session.commit()
-        response = { "success": True, "game_state": game_state }
-        
-    else:
-        response = { "success": False, "game_state": game_state }
-
-    print(response)
-
-    return jsonify(response)
 
 def create_mcts_state(game_state, active_player_id):
     coins = [player["chips"] for player in game_state["players"]]

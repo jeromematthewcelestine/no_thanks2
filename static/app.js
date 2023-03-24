@@ -67,9 +67,11 @@ class PlayerInfo extends React.Component {
 
     return (
       <div className="player">
-        <div className="player-name">{(player.id == 0) ? "jerome " : "Player "+player.id}</div>
-        <div className="score-counter">{player.score} {(player.final_status=="winner"?"*":"")}</div>
-        <div className="chips-counter">{(player.id == 0) ? player.chips : "??"}</div>
+        <div className="player-info">
+          <div className="player-name">{(player.id == 0) ? (player.name) : "Player "+player.id}</div>
+          <div className="score-counter">{player.score} {(player.final_status=="winner"?"*":"")}</div>
+          <div className="chips-counter">{(player.id == 0) ? player.chips : "??"}</div>
+        </div>
         <div className="player-cards">{cardsList}</div>
       </div>
       )
@@ -93,6 +95,16 @@ class GameState extends React.Component {
     if (next_success) {
       this.setState({ game_state });
       this.setState({ active_player_id: game_state.active_player_id });
+    }
+  }
+
+  async resign() {
+    console.log("resign")
+    const response = await fetch(`/game/${game_id}/resign`, {method: "POST"});
+    const {success, game_state} = await response.json();
+
+    if (success) {
+      this.setState({ game_state })
     }
   }
 
@@ -138,22 +150,19 @@ class GameState extends React.Component {
     if (!game_state) {
       return (<div>Loading...</div>);
     }
-    // console.log(game_state.players)
-    // console.log(legal_actions)
+    
+    console.log(game_state.players)
+    
+    let playerInfos = game_state.players.map((player) => <PlayerInfo player={player} game_state={game_state} />);
+
     return (
       <div className="container">
-        <h1 align="center">Card Game</h1>
-        {/*<p>Chips on table: {game_state.table_chips}</p>*/}
-        {/*<p>Deck: {game_state.deck.join(", ")}</p>*/}
-        {/*<p>Current card: {game_state.table_card}</p>*/}
+        <h1 align="center"> </h1>
         <div className="gameArea">
           <CommonArea game_state={game_state} />
           
-          <PlayerInfo player={game_state.players[0]} game_state={game_state} />
-          <PlayerInfo player={game_state.players[1]} game_state={game_state} />
-          <PlayerInfo player={game_state.players[2]} game_state={game_state} />
-          {/* <PlayerInfo player={game_state.players[3]} game_state={game_state} /> */}
-
+          {playerInfos}
+          
           {game_state.is_game_over &&
             <div>
               <p>Game over.</p>
@@ -170,10 +179,15 @@ class GameState extends React.Component {
               <button onClick={() => this.requestNext()}>Next</button>
             </div>
           }
+          <div>
+            <button onClick={() => this.resign()}>Resign</button>
           </div>
+          </div>
+          
           <div className="logArea">
             <GameLog game_state={game_state}/>
           </div>
+          
       </div>
     );
   }

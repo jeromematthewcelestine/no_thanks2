@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>New Game Form</title>
+  </head>
+  <body>
+    <h1>Create a New Game</h1>
+    <form id="new-game-form">
+      <label for="player-name">Player Name:</label>
+      <input type="text" id="player-name" name="player-name"><br>
+
+      <label for="num-ai-players">Number of AI Players:</label>
+      <select id="num-ai-players" name="num-ai-players">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select><br>
+
+      <button type="submit">Create Game</button>
+    </form>
+
+    <script>
+        const form = document.querySelector('#new-game-form');
+        console.log(form)
+form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    console.log('submit')
+  
+  const formData = new FormData(form);
+  player_name = formData.get('player-name')
+  num_ai_players = formData.get('num-ai-players')
+
+  const body = JSON.stringify({
+    player_name: player_name,
+    num_ai_players: parseInt(num_ai_players)
+  });
+
+  const response = await fetch('/create-game', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: body
+  });
+
+  if (response.ok) {
+    const data = await response.json();
+    window.location.href = `/game/${data.game_id}`;
+  } else {
+    alert('Error creating new game');
+  }
+});
+
+    </script>
+  </body>
+
+</html>
