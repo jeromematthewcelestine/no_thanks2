@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>New Game Form</title>
+    <title>NoThanksBot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   </head>
   <body>
+    {% include "header.html" %}
     <h1>Create a New Game</h1>
     <form id="new-game-form">
       <label for="player-name">Player Name:</label>
@@ -11,11 +13,8 @@
 
       <label for="num-ai-players">Number of AI Players:</label>
       <select id="num-ai-players" name="num-ai-players">
-        <option value="1">1</option>
         <option value="2">2</option>
         <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
       </select><br>
 
       <button type="submit">Create Game</button>
@@ -47,7 +46,7 @@ form.addEventListener('submit', async (event) => {
 
   if (response.ok) {
     const data = await response.json();
-    window.location.href = `/game/${data.game_id}`;
+    window.location.href = `/game`;
   } else {
     alert('Error creating new game');
   }

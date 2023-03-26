@@ -2,16 +2,21 @@ class PlayerTurnBanner extends React.Component {
   render() {
     const { game_state, active_player_id, makeMove, newGame } = this.props;
     const activePlayer = game_state.players.find(player => player.id === active_player_id);
-    const playerName = activePlayer.id === 0 ? activePlayer.name : `Player ${activePlayer.id}`;
-    const isHumanPlayer = activePlayer.id === 0;
+    const playerName = activePlayer.name;
+    const isHumanPlayer = activePlayer.id === game_state.human_player_id;
     const isGameOver = game_state.is_game_over;
     let winnerName;
     if (isGameOver) {
       winnerName = game_state.players.find(player => player.final_status === "winner").name;
     }
 
+    console.log("activePlayer.id", activePlayer.id)
+    console.log("playerName", playerName)
+    console.log("game_state.human_player_id", game_state.human_player_id)
+
     return (
       <div className="player-turn-banner">
+        
         {isGameOver ? (
           <div>Game over. {winnerName} wins!{" "}
             <button className="banner-button" onClick={() => newGame()}>New Game</button>
@@ -25,6 +30,7 @@ class PlayerTurnBanner extends React.Component {
         ) : (
           <div>It is {playerName}'s turn.</div>
         )}
+        
       </div>
     );
   }
@@ -81,6 +87,10 @@ class CommonArea extends React.Component {
 }
 
 class PlayerInfo extends React.Component {
+  isConsecutive(card1, card2) {
+    return card2 - card1 === 1;
+  }
+
   render() {
     const player = this.props.player;
     let is_active = null;
@@ -94,8 +104,17 @@ class PlayerInfo extends React.Component {
     const cardsList = player.cards.map((card, index) => {
       let card_div_class = 'card'
       if (player.last_card == card) card_div_class += ' last-chosen'
+
+      let zIndex = 50
+      if (index > 0 && this.isConsecutive(player.cards[index - 1], card)) {
+        card_div_class += ' overlapping-card';
+        zIndex = (50 - index)
+      } else {
+        zIndex = 50
+      }
+
       return (
-        <div className={card_div_class} >
+        <div className={card_div_class} key={index} style={{"zIndex": zIndex}}>
           {card} 
         </div>
       )
@@ -104,9 +123,9 @@ class PlayerInfo extends React.Component {
     return (
       <div className={`player${is_active ? ' active-player' : ''}`}>
         <div className={`player-info${is_active ? ' active-player' : ''}`}>
-          <div className={`player-name${is_active ? ' active-player' : ''}`}>{(player.id == 0) ? (player.name) : "Player "+player.id}</div>
+          <div className={`player-name${is_active ? ' active-player' : ''}`}>{player.name}</div>
           <div className="score-counter">{player.score} {(player.final_status=="winner"?"*":"")}</div>
-          <div className="chips-counter">{(player.id == 0) ? player.chips : "??"}</div>
+          <div className="chips-counter">{(player.id == this.props.game_state.human_player_id) ? player.chips : "??"}</div>
         </div>
         <div className="player-cards">{cardsList}</div>
       </div>
@@ -131,6 +150,10 @@ class GameState extends React.Component {
     if (next_success) {
       this.setState({ game_state });
       this.setState({ active_player_id: game_state.active_player_id });
+
+      if (game_state.active_player_id !== game_state.human_player_id) {
+        this.requestNext()
+      }
     }
   }
 
@@ -142,6 +165,10 @@ class GameState extends React.Component {
     if (success) {
       this.setState({ game_state })
     }
+  }
+
+  newGame() {
+    window.location.href = "/new-game"
   }
 
   async makeMove(action_type) {
@@ -164,11 +191,6 @@ class GameState extends React.Component {
     this.setState({ active_player_id: game_state.active_player_id });
 
     await this.requestNext()
-    await this.requestNext()
-  }
-
-  async newGame() {
-    window.location.href = "/new-game";
   }
 
   async componentDidMount() {
@@ -182,6 +204,10 @@ class GameState extends React.Component {
     console.log("response2")
 
     this.setState({ legal_actions })
+
+    if (game_state.active_player_id !== game_state.human_player_id) {
+      this.requestNext()
+    }
   }
 
   render() {
@@ -209,9 +235,6 @@ class GameState extends React.Component {
           
             {playerInfos}
           
-            <div className="bottomButtons">
-              <button className="bottom-button" onClick={() => this.resign()}>Resign</button>
-            </div>
           </div>
         
         </div>

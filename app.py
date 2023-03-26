@@ -11,10 +11,11 @@ from MCTSPlayer import MCTSPlayer
 
 
 
-mcts_player_3p = MCTSPlayer(thinking_time = 1, filepath = "../mcts_no_thanks/mcts_classic_3p_20230221_05.model")
-print(mcts_player_3p.n_players)
-print(mcts_player_3p.C)
-print(len(mcts_player_3p.plays))
+mcts_player_3p = MCTSPlayer(n_players = 3, thinking_time = 1, filepath = "../mcts_no_thanks/mcts_classic_3p_20230221_05.model")
+mcts_player_4p = MCTSPlayer(n_players = 4, thinking_time = 1, filepath = "../mcts_no_thanks/mcts_classic_4p_20230324_01.model")
+# print(mcts_player_3p.n_players)
+# print(mcts_player_3p.C)
+# print(len(mcts_player_3p.plays))
 
 app = Flask(__name__)
 app.secret_key = 'md3yTHuujFsD7En72cQP'
@@ -45,11 +46,17 @@ def initialize_game(player_name = "Bob", num_opponents = 3):
     print("len omitted_cards", len(omitted_cards))
     table_card = deck.pop()
     
-    human_player = {"id": 0, "type": "human", "name": player_name, "cards": [], "chips": start_chips}
+    human_player = {"type": "human", "name": player_name, "cards": [], "chips": start_chips}
     players = [human_player]
     for i in range(num_opponents):
-        ai_player = {"id": i+1, "type": "ai01", "name": f"Player {i+1}", "cards": [], "chips": start_chips}
+        ai_player = {"type": "ai01", "name": f"Player {i+1}", "cards": [], "chips": start_chips}
         players.append(ai_player)
+
+    # randomize player order
+    random.shuffle(players)
+    for player in players:
+        player["id"] = players.index(player)
+    human_player_id = players.index(human_player)
 
     game_state = {
         "is_game_over": False,
@@ -58,6 +65,7 @@ def initialize_game(player_name = "Bob", num_opponents = 3):
         "table_card": table_card,
         "table_chips": table_chips,
         "players": players,
+        "human_player_id": human_player_id,
         "messages": ["Game started."]
     }
     game = Game(state = json.dumps(game_state),
@@ -67,45 +75,10 @@ def initialize_game(player_name = "Bob", num_opponents = 3):
     db.session.commit()
     return game.id
 
+@app.route('/rules')
+def rules_page():
+    return render_template('rules.html')
 
-# @app.route('/login', methods=['GET', 'POST'])
-# def login():
-#     if request.method == 'POST':
-#         name = request.form['name']
-#         session['name'] = name
-#         return redirect(url_for('list_games'))
-#     else:
-#         return '''
-#             <form method="post">
-#                 <label for="name">Choose a nickname:</label>
-#                 <input type="text" name="name" id="name">
-#                 <input type="submit" value="Submit">
-#             </form>
-#         '''
-
-# Define the logout page
-# @app.route('/logout')
-# def logout():
-#     session.pop('name', None)
-#     return redirect(url_for('login'))
-
-@app.route('/list-games')
-def list_games():
-    games = Game.query.all()
-    return render_template('list_games.html', games=games)
-
-@app.route('/')
-def home():
-    # return ""
-
-    if "game_id" in session:
-        print("game_id in session")
-        print("session game_id", session["game_id"])
-        return redirect(url_for('game_template', game_id=session['game_id']))
-    else:
-        print("game id not in session")
-        return redirect(url_for('new_game'))
-    
 @app.route('/new-game')
 def new_game():
     return render_template('new_game.html')
@@ -120,9 +93,39 @@ def create_game():
     return jsonify({"success": True, "game_id": game_id})
     # return redirect(url_for('game_template', game_id=game_id))
 
-@app.route('/game/<game_id>')
-def game_template(game_id):
-    return render_template('game.html', game_id = game_id)
+
+@app.route('/about')
+def about_page():
+    return render_template('about.html')
+
+@app.route('/list-games')
+def list_games():
+    games = Game.query.all()
+    return render_template('list_games.html', games=games)
+
+@app.route('/')
+def home():
+    return redirect(url_for('game_page'))
+
+    # if "game_id" in session:
+    #     return redirect(url_for('game_page', game_id=session['game_id']))
+    # else:
+    #     print("game id not in session")
+    #     return redirect(url_for('new_game'))
+    
+@app.route('/game')
+def game_page():
+    # if session has a game_id, redirect to that game
+    # otherwise, redirect to new game
+    if "game_id" in session:
+        return render_template('game.html', game_id = session["game_id"])
+        # return redirect(url_for('game_template', game_id=session['game_id']))
+    else:
+        return redirect(url_for('new_game'))
+
+# @app.route('/game/<game_id>')
+# def game_template(game_id):
+    
 
 @app.route('/game/<game_id>/resign', methods = ['POST'])
 def game_resign(game_id):
@@ -160,8 +163,6 @@ def game_state(game_id):
     return jsonify(response)
     # return render_template('game.html', game_id = game_id)
 
-
-
 @app.route('/game-state/<game_id>/player/<player_id>')
 def game_state_for_player(game_id, player_id):
     print(f"/game-state/{game_id}/player/{player_id}")
@@ -179,9 +180,7 @@ def game_state_for_player(game_id, player_id):
         "game_state": game_state,
         "legal_actions": legal_actions
     }
-    
     return jsonify(response)
-
 
 @app.route('/game/<game_id>/next', methods = ['GET'])
 def get_next(game_id):
@@ -199,9 +198,15 @@ def get_next(game_id):
     legal_actions = get_legal_actions(game_state, active_player_id)
 
     if (len(game_state["players"]) == 3):
-        mcts_state = create_mcts_state(game_state, active_player_id)
+        mcts_state = create_mcts_state(mcts_player_3p, game_state, active_player_id)
         mcts_legal_actions = create_mcts_legal_actions(legal_actions)
         mcts_action = mcts_player_3p.get_action(mcts_state, mcts_legal_actions)
+        mcts_to_action = {0: "TAKE_CARD", 1: "PAY_CHIP"}
+        action = mcts_to_action[mcts_action]
+    elif (len(game_state["players"]) == 4):
+        mcts_state = create_mcts_state(mcts_player_4p, game_state, active_player_id)
+        mcts_legal_actions = create_mcts_legal_actions(legal_actions)
+        mcts_action = mcts_player_4p.get_action(mcts_state, mcts_legal_actions)
         mcts_to_action = {0: "TAKE_CARD", 1: "PAY_CHIP"}
         action = mcts_to_action[mcts_action]
     else:
@@ -215,7 +220,6 @@ def get_next(game_id):
     print(game_state)
 
     return jsonify({ "success": True, "game_state": game_state })
-
 
 @app.route('/game/<game_id>/action', methods = ['POST'])
 def game_action(game_id):
@@ -341,7 +345,7 @@ def do_action(game_state, action_type):
     return game_state
 
 
-def create_mcts_state(game_state, active_player_id):
+def create_mcts_state(mcts_player, game_state, active_player_id):
     coins = [player["chips"] for player in game_state["players"]]
     cards = [player["cards"] for player in game_state["players"]]
     card_in_play = game_state["table_card"]
@@ -358,29 +362,29 @@ def create_mcts_legal_actions(legal_actions):
     mcts_to_action = {0: "TAKE_CARD", 1: "PAY_CHIP"}
     return [action_to_mcts[action] for action in legal_actions]
 
-def do_computer_moves(game_state):
-    while True:
-        # loop through computer players
-        active_player_id = game_state["active_player_id"]
-        # if human player's turn, break
-        if game_state["players"][active_player_id]["type"] == "human":
-            break
-        if game_state["is_game_over"]:
-            break
+# def do_computer_moves(game_state):
+#     while True:
+#         # loop through computer players
+#         active_player_id = game_state["active_player_id"]
+#         # if human player's turn, break
+#         if game_state["players"][active_player_id]["type"] == "human":
+#             break
+#         if game_state["is_game_over"]:
+#             break
 
-        legal_actions = get_legal_actions(game_state, active_player_id)
+#         legal_actions = get_legal_actions(game_state, active_player_id)
 
-        mcts_state = create_mcts_state(game_state, active_player_id)
-        mcts_legal_actions = create_mcts_legal_actions(legal_actions)
-        mcts_action = mcts_player.get_action(mcts_state, mcts_legal_actions)
-        mcts_to_action = {0: "TAKE_CARD", 1: "PAY_CHIP"}
-        action = mcts_to_action[mcts_action]
+#         mcts_state = create_mcts_state(game_state, active_player_id)
+#         mcts_legal_actions = create_mcts_legal_actions(legal_actions)
+#         mcts_action = mcts_player.get_action(mcts_state, mcts_legal_actions)
+#         mcts_to_action = {0: "TAKE_CARD", 1: "PAY_CHIP"}
+#         action = mcts_to_action[mcts_action]
 
-        # action = ai01_get_action(legal_actions)
+#         # action = ai01_get_action(legal_actions)
 
-        game_state = do_action(game_state, action)
+#         game_state = do_action(game_state, action)
 
-    return game_state
+#     return game_state
 
 
 if __name__ == '__main__':

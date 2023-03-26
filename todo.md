@@ -16,5 +16,8 @@ Home page -
 - Grid layout for players
 - Card backs
 - Card fronts (number in top corner, place cards on top)
-- 
+- Priority: learn CSS grid and CSS flex
+- Create multiple pages (high scores and about)
+    - Use flask templating
+- Design new game page
 
