@@ -255,4 +255,12 @@ h1 {
   .overlapping-card {
     margin: 10px 10px 10px -22px;
   } 
+
+  table {
+    margin: 0 auto;
+    border-spacing: 20px 0px;
+  }
+  td, th {
+    text-align: center;
+  }
   

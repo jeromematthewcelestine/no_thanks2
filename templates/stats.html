@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>NoThanksBot</title>
+    <script src="https://unpkg.com/react@17.0.2/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone/babel.min.js"></script>
+    <script>
+      let game_id = {{game_id}};
+    </script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  {% include "header.html" %}
+
+  <h1 style="text-align: center;">Game Stats</h1>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Played</th>
+        <th>Player Wins</th>
+        <th>NoThanksBot Wins</th>
+        <th>Player Win Rate</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for stats1 in stats_data %}
+        <tr>
+          <td>{{ stats1.player_count }} Players</td>
+          <td>{{ stats1.n_games }}</td>
+          <td>{{ stats1.human_wins }}</td>
+          <td>{{ stats1.ai_wins }}</td>
+          <td>{{ stats1.win_rate }} </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h1 style="text-align: center; margin-top: 50px;">Low Scores</h2>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Player</th>
+        <th>Date</th>
+        <th>Score</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for game in low_scores %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ game.name }}</td>
+          <td>{{ game.date }}</td>
+          <td>{{ game.score }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

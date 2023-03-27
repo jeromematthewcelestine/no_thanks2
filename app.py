@@ -3,19 +3,15 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import json
 import random
+from datetime import datetime
 
 import sys
 sys.path.append("..")
 sys.path.append("../mcts_no_thanks")
 from MCTSPlayer import MCTSPlayer
 
-
-
 mcts_player_3p = MCTSPlayer(n_players = 3, thinking_time = 1, filepath = "../mcts_no_thanks/mcts_classic_3p_20230221_05.model")
 mcts_player_4p = MCTSPlayer(n_players = 4, thinking_time = 1, filepath = "../mcts_no_thanks/mcts_classic_4p_20230324_01.model")
-# print(mcts_player_3p.n_players)
-# print(mcts_player_3p.C)
-# print(len(mcts_player_3p.plays))
 
 app = Flask(__name__)
 app.secret_key = 'md3yTHuujFsD7En72cQP'
@@ -32,6 +28,44 @@ class Game(db.Model):
     state = db.Column(db.Text)
     username = db.Column(db.Text)
     status = db.Column(db.Text)
+
+class CompletedGame(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    time = db.Column(db.DateTime, default=datetime.utcnow)
+    human_player = db.Column(db.String(50))
+    human_score = db.Column(db.Integer)
+    ai_1_score = db.Column(db.Integer)
+    ai_2_score = db.Column(db.Integer, nullable=True)
+    ai_3_score = db.Column(db.Integer, nullable=True)
+    num_ai_players = db.Column(db.Integer)
+    human_won = db.Column(db.Boolean)
+
+def record_completed_game(game_state):
+    print("Recording completed game")
+    num_ai_players = len(game_state['players']) - 1
+    human_player = game_state['players'][game_state['human_player_id']]['name']
+    human_score = game_state['players'][game_state['human_player_id']]['score']
+    # ai_1_score = game_state['players'][(game_state['human_player_id'] + 1) % 4]['score']
+    
+    # if num_ai_players == 2:
+    #     ai_2_score = game_state['players'][(game_state['human_player_id'] + 2) % 4]['score']
+    #     ai_3_score = None
+    # elif num_ai_players == 3:
+    #     ai_2_score = game_state['players'][(game_state['human_player_id'] + 2) % 4]['score']
+    #     ai_3_score = game_state['players'][(game_state['human_player_id'] + 3) % 4]['score']
+    # else:
+    #     ai_2_score = None
+    #     ai_3_score = None
+
+    human_player_id = game_state['human_player_id']
+    human_won = (human_player_id in game_state['winners'])
+    
+    completed_game = CompletedGame(human_player=human_player,
+                                    human_score=human_score,
+                                    num_ai_players=num_ai_players,
+                                    human_won=human_won)
+    db.session.add(completed_game)
+    db.session.commit()
 
 def initialize_game(player_name = "Bob", num_opponents = 3):
 
@@ -106,12 +140,6 @@ def list_games():
 @app.route('/')
 def home():
     return redirect(url_for('game_page'))
-
-    # if "game_id" in session:
-    #     return redirect(url_for('game_page', game_id=session['game_id']))
-    # else:
-    #     print("game id not in session")
-    #     return redirect(url_for('new_game'))
     
 @app.route('/game')
 def game_page():
@@ -122,10 +150,6 @@ def game_page():
         # return redirect(url_for('game_template', game_id=session['game_id']))
     else:
         return redirect(url_for('new_game'))
-
-# @app.route('/game/<game_id>')
-# def game_template(game_id):
-    
 
 @app.route('/game/<game_id>/resign', methods = ['POST'])
 def game_resign(game_id):
@@ -341,8 +365,39 @@ def do_action(game_state, action_type):
             game_state["table_card"] = None
             game_state["is_game_over"] = True
             game_state = calculate_scores_and_winners(game_state)
+            record_completed_game(game_state)
 
     return game_state
+
+@app.route('/stats')
+def stats():
+    stats_data = []
+    for player_count in range(3, 5):
+        games = CompletedGame.query.filter_by(num_ai_players=player_count-1).all()
+        n_games = len(games)
+        print("n_games: ", n_games)
+        human_wins = len([game for game in games if game.human_won])
+        ai_wins = n_games - human_wins
+        stats_data.append({
+            "player_count": player_count,
+            "n_games": n_games,
+            "human_wins": human_wins,
+            "ai_wins": ai_wins,
+            "win_rate": str(round(human_wins / n_games, 2)),
+        })
+
+    
+    # Get the top 10 lowest scores for human players
+    low_scores = []
+    for game in CompletedGame.query.filter_by(human_won=True).order_by(CompletedGame.human_score).limit(10):
+        date_str = game.time.strftime("%Y-%m-%d")
+        low_scores.append({
+            "name": game.human_player,
+            "date": date_str,
+            "score": game.human_score
+        })
+
+    return render_template('stats.html', stats_data=stats_data, low_scores=low_scores)
 
 
 def create_mcts_state(mcts_player, game_state, active_player_id):
@@ -361,31 +416,6 @@ def create_mcts_legal_actions(legal_actions):
     action_to_mcts = {"TAKE_CARD": 0, "PAY_CHIP": 1}
     mcts_to_action = {0: "TAKE_CARD", 1: "PAY_CHIP"}
     return [action_to_mcts[action] for action in legal_actions]
-
-# def do_computer_moves(game_state):
-#     while True:
-#         # loop through computer players
-#         active_player_id = game_state["active_player_id"]
-#         # if human player's turn, break
-#         if game_state["players"][active_player_id]["type"] == "human":
-#             break
-#         if game_state["is_game_over"]:
-#             break
-
-#         legal_actions = get_legal_actions(game_state, active_player_id)
-
-#         mcts_state = create_mcts_state(game_state, active_player_id)
-#         mcts_legal_actions = create_mcts_legal_actions(legal_actions)
-#         mcts_action = mcts_player.get_action(mcts_state, mcts_legal_actions)
-#         mcts_to_action = {0: "TAKE_CARD", 1: "PAY_CHIP"}
-#         action = mcts_to_action[mcts_action]
-
-#         # action = ai01_get_action(legal_actions)
-
-#         game_state = do_action(game_state, action)
-
-#     return game_state
-
 
 if __name__ == '__main__':
     app.run(port = 8000, debug=True)
