@@ -11,8 +11,8 @@ import sys
 # sys.path.append("../mcts_no_thanks")
 from MCTSPlayer import MCTSPlayer
 
-mcts_player_3p = MCTSPlayer(n_players = 3, thinking_time = 1, filepath = "../mcts_no_thanks/mcts_classic_3p_20230221_05.model")
-mcts_player_4p = MCTSPlayer(n_players = 4, thinking_time = 1, filepath = "../mcts_no_thanks/mcts_classic_4p_20230324_01.model")
+mcts_player_3p = MCTSPlayer(n_players = 3, thinking_time = 1, filepath = "mcts_classic_3p_20230221_05.model")
+mcts_player_4p = MCTSPlayer(n_players = 4, thinking_time = 1, filepath = "mcts_classic_4p_20230324_01.model")
 
 try:
     DATABASE_URL = os.environ['DATABASE_URL']
