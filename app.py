@@ -14,10 +14,15 @@ from MCTSPlayer import MCTSPlayer
 mcts_player_3p = MCTSPlayer(n_players = 3, thinking_time = 1, filepath = "mcts_classic_3p_20230221_05.model")
 mcts_player_4p = MCTSPlayer(n_players = 4, thinking_time = 1, filepath = "mcts_classic_4p_20230324_01.model")
 
-try:
-    DATABASE_URL = os.environ['DATABASE_URL']
-except KeyError:
-    pass
+# try:
+#     DATABASE_URL = "postgres://kmoaudqpokylip:f73f7dd29df1efe3e688fa63549416fc18c14dee49a88fa5a8c75ccfc3f602fe@ec2-54-234-13-16.compute-1.amazonaws.com:5432/d2odh6gm3ttumc"
+# except KeyError:
+#     pass
+dev = False
+if dev:
+    DATABASE_URL = "postgresql://jeromew:sclub8@localhost/nothanks2"
+else:
+    DATABASE_URL = "postgres://kmoaudqpokylip:f73f7dd29df1efe3e688fa63549416fc18c14dee49a88fa5a8c75ccfc3f602fe@ec2-54-234-13-16.compute-1.amazonaws.com:5432/d2odh6gm3ttumc"
 
 try:
     from local_settings import *
