@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 import json
 import random
 from datetime import datetime
+import os
 
 import sys
 sys.path.append("..")
@@ -13,9 +14,19 @@ from MCTSPlayer import MCTSPlayer
 mcts_player_3p = MCTSPlayer(n_players = 3, thinking_time = 1, filepath = "../mcts_no_thanks/mcts_classic_3p_20230221_05.model")
 mcts_player_4p = MCTSPlayer(n_players = 4, thinking_time = 1, filepath = "../mcts_no_thanks/mcts_classic_4p_20230324_01.model")
 
+try:
+    DATABASE_URL = os.environ['DATABASE_URL']
+except KeyError:
+    pass
+
+try:
+    from local_settings import *
+except ImportError as e:
+    pass
+
 app = Flask(__name__)
 app.secret_key = 'md3yTHuujFsD7En72cQP'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///nothanks.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 db = SQLAlchemy(app)
 
 migrate = Migrate(app, db)
@@ -378,12 +389,16 @@ def stats():
         print("n_games: ", n_games)
         human_wins = len([game for game in games if game.human_won])
         ai_wins = n_games - human_wins
+        if n_games:
+            win_rate = str(round(human_wins / n_games, 2))
+        else:
+            win_rate = "N/A"
         stats_data.append({
             "player_count": player_count,
             "n_games": n_games,
             "human_wins": human_wins,
             "ai_wins": ai_wins,
-            "win_rate": str(round(human_wins / n_games, 2)),
+            "win_rate": win_rate,
         })
 
     
