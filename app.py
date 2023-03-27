@@ -7,8 +7,8 @@ from datetime import datetime
 import os
 
 import sys
-sys.path.append("..")
-sys.path.append("../mcts_no_thanks")
+# sys.path.append("..")
+# sys.path.append("../mcts_no_thanks")
 from MCTSPlayer import MCTSPlayer
 
 mcts_player_3p = MCTSPlayer(n_players = 3, thinking_time = 1, filepath = "../mcts_no_thanks/mcts_classic_3p_20230221_05.model")
