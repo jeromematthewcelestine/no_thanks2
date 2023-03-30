@@ -9,7 +9,7 @@ import os, psutil
 
 
 class MCTSPlayer():
-    def __init__(self, n_players = 3, thinking_time = 1, min_card = 3, max_card = 33, filepath = None):
+    def __init__(self, n_players = 3, thinking_time = 1, min_card = 3, max_card = 35, start_coins = 11, n_omit_cards = 9, filepath = None):
 
         self.thinking_time = thinking_time
         self.max_moves = 200
@@ -17,18 +17,23 @@ class MCTSPlayer():
         self.wins = {}
         self.plays = {}
 
-        self.min_card = 3
-        self.max_card = 33
+        self.min_card = min_card
+        self.max_card = max_card
+        self.start_coins = start_coins
+        self.n_omit_cards = n_omit_cards
 
         self.n_players = n_players
 
         if filepath:
+            print("Loading from file...")
             self.load_from(filepath)
 
         self.C = 1.4
 
         process = psutil.Process(os.getpid())
         print("memory (in bytes): ", process.memory_info().rss)  # in bytes 
+
+        print("Size of plays:", len(self.plays))
 
     def make_state_packed(self, coins, cards, card_in_play, coins_in_play, n_cards_in_deck, current_player):
         details = (card_in_play, coins_in_play, n_cards_in_deck, current_player)
@@ -45,7 +50,11 @@ class MCTSPlayer():
 
         begin = datetime.datetime.utcnow()
         while datetime.datetime.utcnow() - begin < calculation_time:
-            board = no_thanks.Board(self.n_players, min_card = self.min_card, max_card = self.max_card)
+            board = no_thanks.Board(self.n_players,
+                                    min_card = self.min_card,
+                                    max_card = self.max_card,
+                                    start_coins = self.start_coins,
+                                    n_omit_cards = self.n_omit_cards)
             initial_state = board.pack_state(board.starting_state())
             self.run_simulation(initial_state, board)
             games += 1
@@ -56,7 +65,11 @@ class MCTSPlayer():
     def get_action(self, state, legal_actions):
         self.max_depth = 0
 
-        board = no_thanks.Board(self.n_players)
+        board = no_thanks.Board(self.n_players,
+                                    min_card = self.min_card,
+                                    max_card = self.max_card,
+                                    start_coins = self.start_coins,
+                                    n_omit_cards = self.n_omit_cards)
         
         player = state[2][3]
         # legal_actions = self.board.legal_actions(state)
@@ -67,13 +80,15 @@ class MCTSPlayer():
             return legal_actions[0]
         
         if self.thinking_time > 0:
-            
-
             games = 0
             calculation_delta = datetime.timedelta(seconds = self.thinking_time)
             begin = datetime.datetime.utcnow()
             while datetime.datetime.utcnow() - begin < calculation_delta:
-                board = no_thanks.Board(self.n_players)
+                board = no_thanks.Board(self.n_players,
+                                        min_card = self.min_card,
+                                        max_card = self.max_card,
+                                        start_coins = self.start_coins,
+                                        n_omit_cards = self.n_omit_cards)
                 self.run_simulation(state, board)
                 games += 1
 
@@ -94,7 +109,18 @@ class MCTSPlayer():
             pass
             print("{3}: {0:.2f}% ({1} / {2})".format(*x))
 
-        print("Maximum depth searched:", self.max_depth)
+        print("Player", player)
+        print("Legal actions:", legal_actions)
+        print("State: ", state)
+        # key = (player, state, 0)
+        # for i, key in enumerate(self.plays):
+        #     print("Stored plays:", key, self.plays[key])
+        #     if i > 10:
+        #         break
+        # if key in self.plays:
+            # print("Stored plays:", self.plays[key])
+        print("Stored plays:", self.plays.get((player, state, 0), 1))
+        print("Stored wins:", self.wins.get((player, state, 0), 0))
 
         return action
 
@@ -167,5 +193,5 @@ class MCTSPlayer():
             self.wins = input_object["wins"]
 
 
-if __name__ == "__main__":
-    mcts_player = MCTSPlayer("mcts_classic_4p_20230324_01.model")
+# if __name__ == "__main__":
+#     mcts_player = MCTSPlayer("mcts_classic_4p_20230324_01.model")

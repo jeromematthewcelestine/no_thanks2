@@ -2,6 +2,72 @@
     box-sizing: border-box;
     font-family: Arial, sans-serif;
 }
+/* new game stuff */
+.new-game-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+form#new-game-form {
+    display: grid;
+    grid-template-columns: 150px 150px;
+    grid-gap: 10px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+#player-name-input-label {
+    grid-row: 1;
+}
+#player-name-input {
+    grid-row: 1;
+}
+#num-ai-players-input-label {
+    grid-row: 2;
+}
+#num-ai-players-input {
+    grid-row: 2;
+}
+#
+
+label {
+    text-align: right;
+  }
+  
+input[type="text"],
+input[type="radio"],
+button[type="submit"] {
+padding: 5px;
+border-radius: 5px;
+border: 1px solid #ccc;
+font-size: 14px;
+grid-column: 2;
+}
+  
+  button[type="submit"] {
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    grid-column-start: 1;
+    grid-column-end: 3;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #0069d9;
+  }
+  
+  input[type="radio"] {
+    margin-left: 5px;
+    margin-right: 5px;
+    grid-column: 2
+  }
+  
+  input[type="radio"] + label {
+    grid-column: 2;
+    margin-left: 5px;
+  }
+  
 
 body {
     margin: 0;
@@ -10,7 +76,7 @@ body {
 }
 
 h1 {
-    font-family: monospace;
+    font-family: 'Courier New', Courier, monospace;
 }
 
 .header {
@@ -52,7 +118,7 @@ h1 {
 .player {
     border: 1px dashed gray;
     border-radius: 8px;
-    padding: 5px;
+    padding: 5px 30px;
     margin: 10px;
     display: flex;
     flex-direction: row;
@@ -70,9 +136,7 @@ h1 {
 }
 
 .active-player {
-    background-color: gold;
-    padding: 2px;
-    border-radius: 5px;
+    background-color: beige;
   }
 
 .player-cards {
@@ -91,29 +155,53 @@ h1 {
 .player-name {
     font-size: 18px;
     font-weight: bold;
-    margin-bottom: 10px;
+    /* margin-bottom: 10px; */
     text-align: left;
     width: 100px;
 }
 
+.player-name-0 {
 
+    color: red;
+}
+#loading-spinner {
+    margin-right: 15px;
+}
+.player-name-1 {
+    color: blue;
+}
+.player-name-2 {
+    color: green;
+}
+.player-name-3 {
+    color: orange;
+}
 
 /* Styling for the card */
 .card {
+    color: black;
     border: 1px solid black;
-    background-color: cornsilk;
+    background-color: #ebf3f5;
     border-radius: 8px;
-    width: 50px;
-    height: 70px;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
+    width: 60px;
+    height: 80px;
     font-size: 24px;
     font-weight: bold;
-    margin-right: 5px;
     margin-top: 10px;
     margin-bottom: 10px;
-    margin-left: 0px;
+    margin-right: 7px;
+    margin-left: 7px;
+    position: relative;
+    display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.overlapping-card {
+    margin-left: -30px;
+}
+
+.card-text {
+    font-size: 18pt;
 }
 
 .card-empty {
@@ -122,7 +210,8 @@ h1 {
 }
 
 .chips-counter {
-    border: 1px solid black;
+    color: white;
+    border: 1px dashed black;
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -145,6 +234,32 @@ h1 {
     display: inline-flex;
     font-weight: bold;
 }
+.score-counter-invisble {
+    display: none;
+}
+
+.score-container {
+    position: relative;
+    width: 34px;
+    height: 34px;
+}
+.score-text-container {
+    position: absolute;
+    top: 3px;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.score-bold {
+    font-weight: bold;
+}
+.score-normal {
+    font-weight: normal;
+}
 
 .commonArea {
     display: flex;
@@ -159,7 +274,8 @@ h1 {
     flex-wrap: wrap;
 }
 
-.deck .card {
+.deck-card {
+    color: black;
     background: repeating-linear-gradient(
         45deg,
         gray,
@@ -185,7 +301,7 @@ h1 {
 }
 
 .player-turn-banner {
-    background-color: beige;
+    background-color: gold;
     width: 100%;
     height: 60px;
     padding: 10px;
@@ -199,7 +315,8 @@ h1 {
   }
   
   .banner-button {
-    background-color: slateblue;
+    font-weight: bold;
+    background-color: red;
     border-radius: 5px;
     border: none;
     color: white;
@@ -215,7 +332,7 @@ h1 {
   }
   
   .banner-button:hover {
-    background-color: darkslateblue;
+    background-color: darkred;
   }
 
   .gameWrapper {
@@ -252,9 +369,7 @@ h1 {
     background-color: darkgray;
   }
 
-  .overlapping-card {
-    margin: 10px 10px 10px -22px;
-  } 
+
 
   table {
     margin: 0 auto;
@@ -263,4 +378,4 @@ h1 {
   td, th {
     text-align: center;
   }
-  
+

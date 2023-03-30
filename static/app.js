@@ -1,34 +1,51 @@
 class PlayerTurnBanner extends React.Component {
   render() {
-    const { game_state, active_player_id, makeMove, newGame } = this.props;
+    const { game_state, active_player_id, makeMove, newGame, legal_actions } = this.props;
     const activePlayer = game_state.players.find(player => player.id === active_player_id);
     const playerName = activePlayer.name;
     const isHumanPlayer = activePlayer.id === game_state.human_player_id;
     const isGameOver = game_state.is_game_over;
-    let winnerName;
+    // const canPass = activePlayer
+    let winner;
+    let winnerNameSpanClass
+    console.log('legal_actions', legal_actions)
     if (isGameOver) {
-      winnerName = game_state.players.find(player => player.final_status === "winner").name;
+      winner = game_state.players.find(player => player.final_status === "winner");
+      winnerNameSpanClass = 'player-name-' + winner.id;
+    }
+    const playerNameSpanClass = 'player-name-' + active_player_id;
+
+    let you_must_message;
+    if (legal_actions && isHumanPlayer && legal_actions.includes('PAY_CHIP')) {
+      you_must_message = 
+      <div>
+        <span className={playerNameSpanClass}>{playerName}</span>, it is your turn. You must{" "}
+        <button className="banner-button" onClick={() => makeMove('PAY_CHIP')}>PASS</button> or
+        <button className="banner-button" onClick={() => makeMove('TAKE_CARD')}>TAKE CARD</button>.
+      </div>
+    } else {
+      if (legal_actions && isHumanPlayer) {
+        you_must_message =
+        <div>
+          <span className={playerNameSpanClass}>{playerName}</span>, it is your turn. You must
+          <button className="banner-button" onClick={() => makeMove('TAKE_CARD')}>TAKE CARD</button>.
+        </div>
+      }
     }
 
-    console.log("activePlayer.id", activePlayer.id)
-    console.log("playerName", playerName)
-    console.log("game_state.human_player_id", game_state.human_player_id)
+
 
     return (
       <div className="player-turn-banner">
         
         {isGameOver ? (
-          <div>Game over. {winnerName} wins!{" "}
+          <div>Game over. <span className={winnerNameSpanClass}>{winner.name}</span> wins!{" "}
             <button className="banner-button" onClick={() => newGame()}>New Game</button>
           </div>
         ) : isHumanPlayer ? (
-          <div>
-            {playerName}, it is your turn. You must{" "}
-            <button className="banner-button" onClick={() => makeMove('PAY_CHIP')}>PASS</button> or{" "}
-            <button className="banner-button" onClick={() => makeMove('TAKE_CARD')}>TAKE CARD</button>.
-          </div>
+          you_must_message
         ) : (
-          <div>It is {playerName}'s turn.</div>
+          <div>It is <span className={playerNameSpanClass}>{playerName}</span>'s turn.</div>
         )}
         
       </div>
@@ -40,22 +57,22 @@ class PlayerTurnBanner extends React.Component {
 
 
 
-class GameLog extends React.Component {
+// class GameLog extends React.Component {
 
-  render() {
+//   render() {
 
-    const messageItems = this.props.game_state.messages.slice(0).reverse().map((message, idx) => 
-      <div key={idx}>{message}</div>
-    );
+//     const messageItems = this.props.game_state.messages.slice(0).reverse().map((message, idx) => 
+//       <div key={idx}>{message}</div>
+//     );
     
     
-    return (
-      <div className="log">
-        {messageItems}
-      </div>)
+//     return (
+//       <div className="log">
+//         {messageItems}
+//       </div>)
 
-  }
-}
+//   }
+// }
 
 class CommonArea extends React.Component {
 
@@ -71,9 +88,13 @@ class CommonArea extends React.Component {
   return (
     <div className="commonArea">
       <div className="deck">
-        <div className="card"></div>
-        <div className="card"></div>
-        <div className="card">{this.props.game_state.deck.length}</div>
+        {this.props.game_state.deck.length >= 3 &&
+        <div className="card deck-card"></div>}
+        {this.props.game_state.deck.length >= 2 &&
+        <div className="card deck-card"></div>}
+        {this.props.game_state.deck.length >= 1 ?
+          (<div className="card deck-card">{this.props.game_state.deck.length}</div>) :
+          (<div className="card card-empty">{this.props.game_state.deck.length}</div>)}
       </div>
 
       {current_card}
@@ -95,10 +116,21 @@ class PlayerInfo extends React.Component {
     const player = this.props.player;
     let is_active = null;
 
-    if (this.props.player.id === this.props.game_state.active_player_id) {
+    let profile_image = null;
+    if (this.props.player.id === this.props.game_state.active_player_id && !this.props.game_state.is_game_over) {
       is_active = true;
+      if (this.props.player.id !== this.props.game_state.human_player_id) {
+        profile_image = <img src="/static/Spinner-2.4s-34px.svg" id="loading-spinner" height="24" width="24"></img>
+      } else {
+        profile_image = <img src="/static/user-filled-svgrepo-com.svg" height="24" width="24" id="loading-spinner"></img>
+      }
     } else {
       is_active = false;
+      if (this.props.player.id !== this.props.game_state.human_player_id) {
+        profile_image = <img src="/static/robot-icon.svg" id="loading-spinner" height="24" width="24"></img>
+      } else {
+        profile_image = <img src="/static/user-filled-svgrepo-com.svg" height="24" width="24" id="loading-spinner"></img>
+      }
     }
 
     const cardsList = player.cards.map((card, index) => {
@@ -114,18 +146,35 @@ class PlayerInfo extends React.Component {
       }
 
       return (
-        <div className={card_div_class} key={index} style={{"zIndex": zIndex}}>
-          {card} 
-        </div>
-      )
+          <div className={card_div_class} key={index} style={{"zIndex": zIndex}}>
+            <div className="card-text">{card}</div> 
+          </div>
+        )
     });
+
+    let chips_display;
+    if (player.id == this.props.game_state.human_player_id || this.props.game_state.is_game_over) {
+      chips_display = player.chips
+    } else {
+      chips_display = "?"
+    }
 
     return (
       <div className={`player${is_active ? ' active-player' : ''}`}>
         <div className={`player-info${is_active ? ' active-player' : ''}`}>
-          <div className={`player-name${is_active ? ' active-player' : ''}`}>{player.name}</div>
-          <div className="score-counter">{player.score} {(player.final_status=="winner"?"*":"")}</div>
-          <div className="chips-counter">{(player.id == this.props.game_state.human_player_id) ? player.chips : "??"}</div>
+        {profile_image}
+          <div className={`player-name${is_active ? ' active-player' : ''}`}>
+            <span className={`player-name-${this.props.player.id}`}>
+              {player.name}
+            </span>
+          </div>
+          {(this.props.game_state.is_game_over && <div className="score-container">
+            <img src="/static/star.svg" height="34" width="34" className="score-icon"></img>
+            <div className="score-text-container">
+              <span className={(player.final_status=="winner"?"score-bold":"score-normal")}>{player.score}</span>
+            </div>
+          </div>)}
+          <div className="chips-counter">{chips_display}</div>
         </div>
         <div className="player-cards">{cardsList}</div>
       </div>
@@ -153,19 +202,26 @@ class GameState extends React.Component {
 
       if (game_state.active_player_id !== game_state.human_player_id) {
         this.requestNext()
+      } else {
+        const response2 = await fetch(`/game-state/${game_id}/player/${game_state.active_player_id}`);
+        const { game_state: game_state2, legal_actions: legal_actions } = await response2.json();
+    
+        this.setState({ legal_actions })
+        this.setState({ game_state });
+        this.setState({ active_player_id: game_state.active_player_id });
       }
     }
   }
 
-  async resign() {
-    console.log("resign")
-    const response = await fetch(`/game/${game_id}/resign`, {method: "POST"});
-    const {success, game_state} = await response.json();
+  // async resign() {
+  //   console.log("resign")
+  //   const response = await fetch(`/game/${game_id}/resign`, {method: "POST"});
+  //   const {success, game_state} = await response.json();
 
-    if (success) {
-      this.setState({ game_state })
-    }
-  }
+  //   if (success) {
+  //     this.setState({ game_state })
+  //   }
+  // }
 
   newGame() {
     window.location.href = "/new-game"
@@ -229,7 +285,8 @@ class GameState extends React.Component {
               game_state={game_state} 
               active_player_id={active_player_id}
               makeMove={this.makeMove.bind(this)}
-              newGame={this.newGame.bind(this)} />
+              newGame={this.newGame.bind(this)} 
+              legal_actions={legal_actions}/>
           
             <CommonArea game_state={game_state} />
           

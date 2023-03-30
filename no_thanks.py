@@ -21,7 +21,7 @@ class HumanPlayer():
         return action
 
 class Board():
-    def __init__(self, n_players = 3, start_coins = 5, min_card = 3, max_card = 33, n_omit_cards = 9):
+    def __init__(self, n_players = 3, start_coins = 11, min_card = 3, max_card = 35, n_omit_cards = 9):
         self.n_players = n_players
         self.start_coins = start_coins
         self.min_card = min_card
@@ -29,6 +29,7 @@ class Board():
         self.full_deck = list(range(self.min_card, self.max_card+1))
         self.n_omit_cards = n_omit_cards
         self.n_cards = max_card - min_card + 1
+        self.chips = 11
 
     # state: ((player coins),(player cards),(card in play, coins in play, n_cards_remaining, current player))
     def starting_state(self):

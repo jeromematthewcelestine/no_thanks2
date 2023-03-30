@@ -11,8 +11,8 @@ import sys
 # sys.path.append("../mcts_no_thanks")
 from MCTSPlayer import MCTSPlayer
 
-mcts_player_3p = MCTSPlayer(n_players = 3, thinking_time = 1, filepath = "mcts_classic_3p_20230221_05.model")
-mcts_player_4p = MCTSPlayer(n_players = 4, thinking_time = 1, filepath = "mcts_classic_4p_20230324_01.model")
+mcts_player_3p = MCTSPlayer(n_players = 3, thinking_time = 0.01, filepath = "mcts_classic_3p_20230221_05.model")
+mcts_player_4p = MCTSPlayer(n_players = 4, thinking_time = 0.01, filepath = "mcts_classic_4p_20230324_01.model")
 
 # try:
 #     DATABASE_URL = "postgres://kmoaudqpokylip:f73f7dd29df1efe3e688fa63549416fc18c14dee49a88fa5a8c75ccfc3f602fe@ec2-54-234-13-16.compute-1.amazonaws.com:5432/d2odh6gm3ttumc"
@@ -85,7 +85,7 @@ def record_completed_game(game_state):
 
 def initialize_game(player_name = "Bob", num_opponents = 3):
 
-    deck = list(range(3, 33))
+    deck = list(range(3, 35+1))
     random.shuffle(deck)
 
     start_chips = 11
@@ -116,7 +116,7 @@ def initialize_game(player_name = "Bob", num_opponents = 3):
         "table_chips": table_chips,
         "players": players,
         "human_player_id": human_player_id,
-        "messages": ["Game started."]
+        # "messages": ["Game started."]
     }
     game = Game(state = json.dumps(game_state),
                 username = "jeromew",
@@ -174,7 +174,7 @@ def game_resign(game_id):
 
     if game.status == "active" and not game_state["is_game_over"]:
         game_state["is_game_over"] = True
-        game_state["messages"].append("Resigned")
+        # game_state["messages"].append("Resigned")
         session.pop("game_id", None)
 
         game.state = json.dumps(game_state)
@@ -359,7 +359,7 @@ def do_action(game_state, action_type):
 
         game_state["active_player_id"] = (active_player_id + 1) % len(game_state["players"])
 
-        game_state["messages"].append(f"Player {active_player_id} paid a chip.")
+        # game_state["messages"].append(f"Player {active_player_id} paid a chip.")
 
 
     elif action_type == "TAKE_CARD":
@@ -369,7 +369,7 @@ def do_action(game_state, action_type):
         game_state["players"][active_player_id]["cards"].sort()
         game_state["players"][active_player_id]["last_card"] = game_state["table_card"]
 
-        game_state["messages"].append(f"Player {active_player_id} took the {game_state['table_card']} card.")
+        # game_state["messages"].append(f"Player {active_player_id} took the {game_state['table_card']} card.")
         
         # Check if deck is empty. If empty, game over.
         if game_state["deck"]:
@@ -438,4 +438,4 @@ def create_mcts_legal_actions(legal_actions):
     return [action_to_mcts[action] for action in legal_actions]
 
 if __name__ == '__main__':
-    app.run(port = 8000, debug=True)
+    app.run(port = 7000, debug=True)
