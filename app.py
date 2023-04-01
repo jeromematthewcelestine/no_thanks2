@@ -25,12 +25,16 @@ mcts_player_4p = MCTSPlayerOnline(n_players = 4, thinking_time = 0.3)
 #     DATABASE_URL = "postgres://kmoaudqpokylip:f73f7dd29df1efe3e688fa63549416fc18c14dee49a88fa5a8c75ccfc3f602fe@ec2-54-234-13-16.compute-1.amazonaws.com:5432/d2odh6gm3ttumc"
 # except KeyError:
 #     pass
-dev = True
+dev = False
 if dev:
     DATABASE_URL = "postgresql://jeromew:sclub8@localhost/nothanks2"
 else:
     DATABASE_URL = "postgres://kmoaudqpokylip:f73f7dd29df1efe3e688fa63549416fc18c14dee49a88fa5a8c75ccfc3f602fe@ec2-54-234-13-16.compute-1.amazonaws.com:5432/d2odh6gm3ttumc"
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+if "DATABASE_URL" in os.environ:
+    DATABASE_URL = os.environ['DATABASE_URL']
+print(DATABASE_URL)
 # try:
 #     from local_settings import *
 # except ImportError as e:
