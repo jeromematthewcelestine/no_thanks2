@@ -34,6 +34,7 @@ else:
 
 if "DATABASE_URL" in os.environ:
     DATABASE_URL = os.environ['DATABASE_URL']
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 print(DATABASE_URL)
 # try:
 #     from local_settings import *
