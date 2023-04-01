@@ -9,7 +9,7 @@ import os, psutil
 
 
 class MCTSPlayer():
-    def __init__(self, n_players = 3, thinking_time = 1, min_card = 3, max_card = 35, start_coins = 11, n_omit_cards = 9, filepath = None):
+    def __init__(self, n_players = 3, thinking_time = 1, min_card = 3, max_card = 35, start_coins = 11, n_omit_cards = 9, filepath = None, no_save = True):
 
         self.thinking_time = thinking_time
         self.max_moves = 200
@@ -27,11 +27,12 @@ class MCTSPlayer():
         if filepath:
             print("Loading from file...")
             self.load_from(filepath)
+        self.no_save = no_save
 
         self.C = 1.4
 
         process = psutil.Process(os.getpid())
-        print("memory (in bytes): ", process.memory_info().rss)  # in bytes 
+        print("memory (MB): ", process.memory_info().rss / 1000000)  # in MB 
 
         print("Size of plays:", len(self.plays))
 
@@ -79,6 +80,12 @@ class MCTSPlayer():
         if len(legal_actions) == 1:
             return legal_actions[0]
         
+        if self.no_save:
+            plays = {}
+            wins = {}
+        else:
+            plays, wins = self.plays, self.wins
+
         if self.thinking_time > 0:
             games = 0
             calculation_delta = datetime.timedelta(seconds = self.thinking_time)
@@ -89,25 +96,32 @@ class MCTSPlayer():
                                         max_card = self.max_card,
                                         start_coins = self.start_coins,
                                         n_omit_cards = self.n_omit_cards)
-                self.run_simulation(state, board)
+                plays, wins = self.run_simulation(state, board, plays, wins)
                 games += 1
 
+        print("plays: ", plays)
+        print("wins: ", wins)
+        
+        if not self.no_save:
+            plays = self.plays
+            wins = self.wins
+
         percent_wins, action = max(
-            (100 * self.wins.get((player, state, action), 0) / 
-             self.plays.get((player, state, action), 1),
+            (100 * wins.get((player, state, action), 0) / 
+             plays.get((player, state, action), 1),
              action)
             for action in legal_actions
         )
 
-        for x in sorted(
-            ((100 * self.wins.get((player, state, action), 0) / self.plays.get((player, state, action), 1), 
-                self.wins.get((player, state, action), 0),
-                self.plays.get((player, state, action), 0), action)
-            for action in legal_actions),
-            reverse=True
-        ):
-            pass
-            print("{3}: {0:.2f}% ({1} / {2})".format(*x))
+        # for x in sorted(
+        #     ((100 * self.wins.get((player, state, action), 0) / self.plays.get((player, state, action), 1), 
+        #         self.wins.get((player, state, action), 0),
+        #         self.plays.get((player, state, action), 0), action)
+        #     for action in legal_actions),
+        #     reverse=True
+        # ):
+        #     pass
+        #     print("{3}: {0:.2f}% ({1} / {2})".format(*x))
 
         print("Player", player)
         print("Legal actions:", legal_actions)
@@ -124,15 +138,15 @@ class MCTSPlayer():
 
         return action
 
-    def run_simulation(self, state, board):
-        plays, wins = self.plays, self.wins
+    def run_simulation(self, state, board, plays, wins):
+        # plays, wins = self.plays, self.wins
 
         visited_actions = set()
         # states_copy = self.states[:]
         # state = states_copy[-1]
         player = board.current_player(state)
 
-        expand = True
+        phase = "selection"
 
         for t in range(1, self.max_moves + 1):
             legal_actions = board.legal_actions(state)
@@ -150,19 +164,25 @@ class MCTSPlayer():
                         for action in legal_actions
                 )
             else:
+                if phase == "selection":
+                    phase = "expansion"
                 # otherwise, just pick a random one
                 action = random.choice(legal_actions)
 
             # states_copy.append(state)
 
-            if expand and (player, state, action) not in plays:
-                expand = False
+            if phase == "expansion" and (player, state, action) not in plays:
                 plays[(player, state, action)] = 0
                 wins[(player, state, action)] = 0
                 if t > self.max_depth:
                     self.max_depth = t
+                phase = "end_expansion"
 
-            visited_actions.add((player, state, action))
+            if phase == "selection" or "phase" == "expansion":
+                visited_actions.add((player, state, action))
+            elif phase == "end_expansion":
+                visited_actions.add((player, state, action))
+                phase = "simulation"
 
             # move to next state
             state = board.next_state(state, action)
@@ -172,13 +192,15 @@ class MCTSPlayer():
             if winner is not None:
                 break
 
+        
 
+        phase = "backpropagation"
         for player, state, action in visited_actions:
-            if (player, state, action) not in plays:
-                continue
             plays[(player, state, action)] += 1
             if player == winner:
                 wins[(player, state, action)] += 1
+
+        return plays, wins
 
     def write(self, filepath):
         output_object = {"wins": self.wins,
@@ -193,5 +215,6 @@ class MCTSPlayer():
             self.wins = input_object["wins"]
 
 
-# if __name__ == "__main__":
-#     mcts_player = MCTSPlayer("mcts_classic_4p_20230324_01.model")
+if __name__ == "__main__":
+    mcts_player = MCTSPlayer()
+    mcts_player.train()

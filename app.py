@@ -4,21 +4,28 @@ from flask_migrate import Migrate
 import json
 import random
 from datetime import datetime
-import os
-
+import os, psutil
 import sys
+from MCTSPlayerOnline import MCTSPlayerOnline
+
 # sys.path.append("..")
 # sys.path.append("../mcts_no_thanks")
-from MCTSPlayer import MCTSPlayer
-
-mcts_player_3p = MCTSPlayer(n_players = 3, thinking_time = 0.01, filepath = "mcts_classic_3p_20230221_05.model")
-mcts_player_4p = MCTSPlayer(n_players = 4, thinking_time = 0.01, filepath = "mcts_classic_4p_20230324_01.model")
+# from MCTSPlayer import MCTSPlayer
+# from MCTSPlayer_db2 import MCTSPlayer_db2
+mcts_player_3p = MCTSPlayerOnline(n_players = 3, thinking_time = 0.3)
+mcts_player_4p = MCTSPlayerOnline(n_players = 4, thinking_time = 0.3)
+# mcts_player_3p = MCTSPlayer(n_players = 3, thinking_time = 0.1, no_save = True)
+# mcts_player_4p = MCTSPlayer(n_players = 4, thinking_time = 0.1, no_save = True)
+# mcts_player_3p = MCTSPlayer(n_players = 3, thinking_time = 0.01, filepath = "mcts_classic_3p_20230221_05.model")
+# mcts_player_3p = MCTSPlayer_db2(n_players=3, thinking_time=0.5)
+# mcts_player_4p = MCTSPlayer_db2(n_players=4, thinking_time=0.5)
+# mcts_player_4p = MCTSPlayer(n_players = 4, thinking_time = 0.01, filepath = "mcts_classic_4p_20230324_01.model")
 
 # try:
 #     DATABASE_URL = "postgres://kmoaudqpokylip:f73f7dd29df1efe3e688fa63549416fc18c14dee49a88fa5a8c75ccfc3f602fe@ec2-54-234-13-16.compute-1.amazonaws.com:5432/d2odh6gm3ttumc"
 # except KeyError:
 #     pass
-dev = False
+dev = True
 if dev:
     DATABASE_URL = "postgresql://jeromew:sclub8@localhost/nothanks2"
 else:
@@ -28,6 +35,10 @@ else:
 #     from local_settings import *
 # except ImportError as e:
 #     pass
+
+def log_memory():
+    process = psutil.Process(os.getpid())
+    print("memory (MB): ", process.memory_info().rss / 1000000)  # in MB
 
 app = Flask(__name__)
 app.secret_key = 'md3yTHuujFsD7En72cQP'
@@ -136,7 +147,7 @@ def new_game():
 @app.route('/create-game/', methods = ['POST'])
 def create_game():
     print("create game")
-    print(request.json)
+    # print(request.json)
     game_id = initialize_game(player_name = request.json["player_name"],
                               num_opponents = request.json["num_ai_players"])
     session['game_id'] = game_id
@@ -195,11 +206,11 @@ def game_state(game_id):
         # return jsonify({'message': 'Not authorized.'}), 400
 
     game_state = json.loads(game.state)
-    print(game_state)
+    # print(game_state)
     response = {
         "game_state": game_state
     }
-    print(jsonify(response))
+    # print(jsonify(response))
     return jsonify(response)
     # return render_template('game.html', game_id = game_id)
 
@@ -257,7 +268,9 @@ def get_next(game_id):
     game.state = json.dumps(game_state)
     db.session.commit()
 
-    print(game_state)
+    log_memory()
+
+    # print(game_state)
 
     return jsonify({ "success": True, "game_state": game_state })
 
@@ -291,7 +304,7 @@ def game_action(game_id):
     else:
         response = { "success": False, "game_state": game_state }
 
-    print(response)
+    # print(response)
 
     return jsonify(response)
 
@@ -438,4 +451,4 @@ def create_mcts_legal_actions(legal_actions):
     return [action_to_mcts[action] for action in legal_actions]
 
 if __name__ == '__main__':
-    app.run(port = 7000, debug=True)
+    app.run(port = 7001, debug=True)

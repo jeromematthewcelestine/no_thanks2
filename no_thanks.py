@@ -1,4 +1,5 @@
 import random
+from dataclasses import dataclass
 
 ACTION_TAKE = 0
 ACTION_PASS = 1
@@ -20,16 +21,23 @@ class HumanPlayer():
 
         return action
 
+@dataclass 
+class NoThanksConfig:
+    min_card: int = 3
+    max_card: int = 35
+    start_coins: int = 11
+    n_omit_cards: int = 9
+
 class Board():
-    def __init__(self, n_players = 3, start_coins = 11, min_card = 3, max_card = 35, n_omit_cards = 9):
+    def __init__(self, n_players = 3, config = NoThanksConfig()):
         self.n_players = n_players
-        self.start_coins = start_coins
-        self.min_card = min_card
-        self.max_card = max_card
+        
+        self.start_coins = config.start_coins
+        self.min_card = config.min_card
+        self.max_card = config.max_card
         self.full_deck = list(range(self.min_card, self.max_card+1))
-        self.n_omit_cards = n_omit_cards
-        self.n_cards = max_card - min_card + 1
-        self.chips = 11
+        self.n_omit_cards = config.n_omit_cards
+        self.n_cards = self.max_card - self.min_card + 1
 
     # state: ((player coins),(player cards),(card in play, coins in play, n_cards_remaining, current player))
     def starting_state(self):
