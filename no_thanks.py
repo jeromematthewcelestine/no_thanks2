@@ -8,19 +8,6 @@ def diff(first, second):
     second = set(second)
     return [item for item in first if item not in second]
 
-class HumanPlayer():
-    def __init__(self):
-        pass
-
-    def get_action(self, history):
-        action_str = input("Take (y/n)? ")
-        if action_str == "y" or action_str == "Y":
-            action = ACTION_TAKE
-        else:
-            action = ACTION_PASS
-
-        return action
-
 @dataclass 
 class NoThanksConfig:
     min_card: int = 3
@@ -28,7 +15,7 @@ class NoThanksConfig:
     start_coins: int = 11
     n_omit_cards: int = 9
 
-class Board():
+class NoThanksBoard():
     def __init__(self, n_players = 3, config = NoThanksConfig()):
         self.n_players = n_players
         
@@ -44,10 +31,8 @@ class Board():
         coins = [self.start_coins for i in range(self.n_players)]
         cards = [[] for i in range(self.n_players)]
 
-        # omitted_cards = [random.choice(self.full_deck) for i in range(self.n_omit_cards)]
         card_in_play = random.choice(self.full_deck)
         
-        # card_in_play = max(self.full_deck)
         coins_in_play = 0
         n_cards_in_deck = self.n_cards - 1 - self.n_omit_cards
         current_player = 0
@@ -65,16 +50,13 @@ class Board():
 
             all_player_cards = [card for player_cards in cards for card in player_cards]
             cards_in_deck = diff(self.full_deck, all_player_cards)
-            # print("cards_in_deck", cards_in_deck)
 
             if cards_in_deck and n_cards_in_deck > 0:
-                # print("cards_in_deck", cards_in_deck)
+                
                 random.shuffle(list(cards_in_deck))
-                # print("cards_in_deck", cards_in_deck)
-                omitted_cards = [cards_in_deck.pop() for i in range(self.n_omit_cards)]
                 card_in_play = random.choice(cards_in_deck)
-                # card_in_play = max(cards_in_deck)
                 n_cards_in_deck -= 1
+
             else:
                 card_in_play = None
             coins_in_play = 0
@@ -89,7 +71,6 @@ class Board():
 
         next_state = coins, cards, (card_in_play, coins_in_play, n_cards_in_deck, current_player)
         return self.pack_state(next_state)
-        # return coins, cards, (card_in_play, coins_in_play, n_cards_in_deck, current_player)
 
     def is_legal(self, state, action):
         coins, cards, (card_in_play, coins_in_play, n_cards_in_deck, current_player) = state
@@ -159,11 +140,40 @@ class Board():
         return scores
 
     def winner(self, state):
+        state = self.unpack_state(state)
+        coins, cards, (card_in_play, coins_in_play, n_cards_in_deck, current_player) = state
+
         if not self.is_ended(state):
             return None
         
         scores = self.compute_scores(state)
-        winner = scores.index(min(scores))
+        min_score = 1000
+        lowest_scorers = []
+        # get lowest scorers (could be more than one)
+        for i, score in enumerate(scores):
+            if score < min_score:
+                lowest_scorers = [i]
+                min_score = score
+            if score <= min_score:
+                lowest_scorers.append(i)
+        
+        # if players are tied on lowest score, get the one with the fewest cards
+        if len(lowest_scorers) > 1:
+            min_n_cards = 1000
+            for i in lowest_scorers:
+                n_cards = len(cards[i])
+                if n_cards < min_n_cards:
+                    lowest_card_players = [i]
+                    min_n_cards = n_cards
+                elif n_cards <= min_n_cards:
+                    lowest_card_players.append(i)
+
+            if len(lowest_card_players) > 1:
+                winner = lowest_card_players[0]
+            else: # if still tied, pick a random winner (not the official rules)
+                winner = random.choice(lowest_card_players) 
+        else:
+            winners = lowest_scorers[0]
 
         return winner
 
