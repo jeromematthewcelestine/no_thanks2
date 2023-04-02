@@ -14,8 +14,12 @@
 <body>
   {% include "header.html" %}
   <h1>About</h1>
-  <p>This is a playable version of the card game No Thanks!</p>
-  <p>The website is created by Jerome Williams.</p>
+  <p>This is a demonstration of an AI bot that plays the card game <a href="https://boardgamegeek.com/boardgame/12942/no-thanks">No Thanks!</a>.</p>
+  <p>The bot uses a variant of the <a href="https://en.wikipedia.org/wiki/Monte_Carlo_tree_search">Monte Carlo tree search</a> algorithm.
+    Code for the bot is available on <a href="https://github.com/jeromematthewcelestine/mcts_no_thanks">Github</a>.</p>
+  <p>Note that while the rules for No Thanks! advise players to keep their chips hidden from their opponents,
+    there is nothing stopping a player from keeping track of the number of chips each player has.
+    Therefore, in this implementation, I allow the bots to observe and rely on all players' chip counts.</p>
   <script type="text/babel" src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
