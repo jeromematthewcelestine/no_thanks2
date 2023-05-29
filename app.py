@@ -14,6 +14,7 @@ mcts_player_4p = MCTSPlayerOnline(n_players = 4, thinking_time = 0.3)
 if "DATABASE_URL" in os.environ:
     DATABASE_URL = os.environ['DATABASE_URL']
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    APP_SECRET_KEY = os.environ['APP_SECRET_KEY']
 else:
     import local_config
     DATABASE_URL = local_config.DATABASE_URL
