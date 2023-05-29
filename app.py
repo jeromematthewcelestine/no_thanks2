@@ -358,8 +358,8 @@ def do_action(game_state, action_type):
         # Check if deck is empty. If empty, game over.
         if game_state["deck"]:
             game_state["table_card"] = game_state["deck"].pop()
-            active_player_id = (active_player_id + 1) % len(game_state["players"])
-            game_state["active_player_id"] = active_player_id
+            # active_player_id = (active_player_id + 1) % len(game_state["players"])
+            # game_state["active_player_id"] = active_player_id
 
         else:
             game_state["table_card"] = None

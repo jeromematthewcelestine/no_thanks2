@@ -17,7 +17,7 @@
   
   <h1>Rules</h1>
   <h2>Quick summary</h2>
-  </p>On your turn, either (1) take the card in the center (and any chips in the center) or (2) if you can, pay a chip into the center and leave the card. The game ends when all cards have been taken. Your score is (1) the sum of the lowest cards in every consecutive sequence of cards you have <b>minus</b> (2) the number of chips you have. The player with the lowest score wins.</p>
+  </p>On your turn, either (1) pass by paying a chip into the center or (2) take the card in the center along with any chips in the center. If you take the center card, flip over the next card in the deck and either pass by paying a chip or take the card. Continue taking cards until you pass, at which point play continues to the next player. The game ends when all cards have been taken. Your score is the sum of the lowest cards in every consecutive sequence of cards you have <b>minus</b> the number of chips you have. The player with the lowest score wins.</p>
   <h2>Setup</h2>
   <p>The deck has 33 numbered cards, from 3 to 35, one card for each number.
   <p>Shuffle the deck and remove 9 random cards from the game without looking at them.</p>
@@ -25,19 +25,19 @@
   <p>Choose the starting player randomly.</p>
   <h2>Gameplay</h2>
     <p>The starting player turns over the top card of the deck and places it face up in the common area the table.</p>
-    <p>On your turn, you must do <b>one</b> of the following:</p>
-      <p>PASS: Place one of your chips on the face-up card, OR</p>
+    <p>On your turn, you must do either PASS or TAKE CARD.
+      <p>PASS: Place one of your chips on the face-up card.</p>
       <p>TAKE CARD: Take the face-up card in the common area of the table and place it face up in front of you. 
-        If you take the card, you also collect all the chips on it. You then turn over the next card from the deck and place it face up in the common area.</p>
+        When you take a card, you also collect all the chips on the card. You then turn over the next card from the deck and place it face up in the common area. You must now either PASS or TAKE CARD again.</p>
     <p>If you do not have any chips, you cannot pass and must instead take the face-up card.</p>
-    <p>Once you have taken either the PASS or TAKE CARD action, play continues to the next player.</p>
-    <p>Play continues until all cards in the deck have been taken by players. When the last card is taken, the game ends immediately.</p>
+    <p>Once you have taken the PASS action, play continues to the next player.</p>
+    <p>Play continues until all cards in the deck have been taken. When the last card is taken, the game ends immediately.</p>
     <h2>Scoring</h2>
     <p>Each card you have face up in front of you is worth points according to its number (e.g., a card with a 5 is worth 5 points).</p>
-    <p>However, if you have a <b>sequence</b> of consecutive cards, only the <b>lowest</b> card in the sequence counts towards your score (e.g., having cards 6, 7, and 8 counts as 6 points).</p>
+    <p>However, if you have a <b>sequence</b> of consecutive cards, only the <b>lowest</b> card in the sequence counts towards your score (e.g., having cards 5, 6, and 7 counts only as 5 points).</p>
     <p>Each chip counts as -1 point.</p>
     <h2>Winning</h2>
-    <p>The player with the lowest number of points wins the game. In case of a tie on points, the player with the fewest cards wins. If there's still a tie, the tied players share the victory.</p>
+    <p>The player with the lowest number of points wins the game. In case of a tie on points, the player with the fewest cards wins.</p>
   </div>
   </div>
   <script type="text/babel" src="{{ url_for('static', filename='app.js') }}"></script>

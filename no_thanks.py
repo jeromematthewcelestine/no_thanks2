@@ -61,13 +61,17 @@ class NoThanksBoard():
                 card_in_play = None
             coins_in_play = 0
 
+            
+
         else:
             coins[current_player] -= 1
             coins_in_play += 1
+            
+            current_player += 1
+            if current_player == self.n_players:
+                current_player = 0
 
-        current_player += 1
-        if current_player == self.n_players:
-            current_player = 0
+        
 
         next_state = coins, cards, (card_in_play, coins_in_play, n_cards_in_deck, current_player)
         return self.pack_state(next_state)
