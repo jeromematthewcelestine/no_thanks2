@@ -1,0 +1,14 @@
+
+.rules > * {
+    font-size: 1rem;
+}
+
+.rules > h1 {
+    font-weight: bold;
+    font-size: 3em;
+}
+
+.rules > h2 {
+    font-weight: bold;
+    font-size: 2em;
+}
