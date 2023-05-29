@@ -11,6 +11,7 @@
 </head>
 <body>
   {% include "header.html" %}
+  <div class="rulesContainer">
   <div class="rules">
 
   
@@ -37,6 +38,7 @@
     <p>Each chip counts as -1 point.</p>
     <h2>Winning</h2>
     <p>The player with the lowest number of points wins the game. In case of a tie on points, the player with the fewest cards wins. If there's still a tie, the tied players share the victory.</p>
+  </div>
   </div>
   <script type="text/babel" src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
