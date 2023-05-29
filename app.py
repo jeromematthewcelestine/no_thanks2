@@ -8,45 +8,23 @@ import os, psutil
 import sys
 from MCTSPlayerOnline import MCTSPlayerOnline
 
-# sys.path.append("..")
-# sys.path.append("../mcts_no_thanks")
-# from MCTSPlayer import MCTSPlayer
-# from MCTSPlayer_db2 import MCTSPlayer_db2
 mcts_player_3p = MCTSPlayerOnline(n_players = 3, thinking_time = 0.3)
 mcts_player_4p = MCTSPlayerOnline(n_players = 4, thinking_time = 0.3)
-# mcts_player_3p = MCTSPlayer(n_players = 3, thinking_time = 0.1, no_save = True)
-# mcts_player_4p = MCTSPlayer(n_players = 4, thinking_time = 0.1, no_save = True)
-# mcts_player_3p = MCTSPlayer(n_players = 3, thinking_time = 0.01, filepath = "mcts_classic_3p_20230221_05.model")
-# mcts_player_3p = MCTSPlayer_db2(n_players=3, thinking_time=0.5)
-# mcts_player_4p = MCTSPlayer_db2(n_players=4, thinking_time=0.5)
-# mcts_player_4p = MCTSPlayer(n_players = 4, thinking_time = 0.01, filepath = "mcts_classic_4p_20230324_01.model")
-
-# try:
-#     DATABASE_URL = "postgres://kmoaudqpokylip:f73f7dd29df1efe3e688fa63549416fc18c14dee49a88fa5a8c75ccfc3f602fe@ec2-54-234-13-16.compute-1.amazonaws.com:5432/d2odh6gm3ttumc"
-# except KeyError:
-#     pass
-dev = False
-if dev:
-    DATABASE_URL = "postgresql://jeromew:sclub8@localhost/nothanks2"
-else:
-    DATABASE_URL = "postgres://kmoaudqpokylip:f73f7dd29df1efe3e688fa63549416fc18c14dee49a88fa5a8c75ccfc3f602fe@ec2-54-234-13-16.compute-1.amazonaws.com:5432/d2odh6gm3ttumc"
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 if "DATABASE_URL" in os.environ:
     DATABASE_URL = os.environ['DATABASE_URL']
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-print(DATABASE_URL)
-# try:
-#     from local_settings import *
-# except ImportError as e:
-#     pass
+else:
+    import local_config
+    DATABASE_URL = local_config.DATABASE_URL
+    APP_SECRET_KEY = local_config.APP_SECRET_KEY
 
 def log_memory():
     process = psutil.Process(os.getpid())
     print("memory (MB): ", process.memory_info().rss / 1000000)  # in MB
 
 app = Flask(__name__)
-app.secret_key = 'md3yTHuujFsD7En72cQP'
+app.secret_key = APP_SECRET_KEY
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 db = SQLAlchemy(app)
 
@@ -77,17 +55,6 @@ def record_completed_game(game_state):
     num_ai_players = len(game_state['players']) - 1
     human_player = game_state['players'][game_state['human_player_id']]['name']
     human_score = game_state['players'][game_state['human_player_id']]['score']
-    # ai_1_score = game_state['players'][(game_state['human_player_id'] + 1) % 4]['score']
-    
-    # if num_ai_players == 2:
-    #     ai_2_score = game_state['players'][(game_state['human_player_id'] + 2) % 4]['score']
-    #     ai_3_score = None
-    # elif num_ai_players == 3:
-    #     ai_2_score = game_state['players'][(game_state['human_player_id'] + 2) % 4]['score']
-    #     ai_3_score = game_state['players'][(game_state['human_player_id'] + 3) % 4]['score']
-    # else:
-    #     ai_2_score = None
-    #     ai_3_score = None
 
     human_player_id = game_state['human_player_id']
     human_won = (human_player_id in game_state['winners'])
@@ -132,7 +99,6 @@ def initialize_game(player_name = "Bob", num_opponents = 3):
         "table_chips": table_chips,
         "players": players,
         "human_player_id": human_player_id,
-        # "messages": ["Game started."]
     }
     game = Game(state = json.dumps(game_state),
                 username = "jeromew",
@@ -179,7 +145,6 @@ def game_page():
     # otherwise, redirect to new game
     if "game_id" in session:
         return render_template('game.html', game_id = session["game_id"])
-        # return redirect(url_for('game_template', game_id=session['game_id']))
     else:
         return redirect(url_for('new_game'))
 
@@ -424,7 +389,6 @@ def stats():
             "win_rate": win_rate,
         })
 
-    
     # Get the top 10 lowest scores for human players
     low_scores = []
     for game in CompletedGame.query.filter_by(human_won=True).order_by(CompletedGame.human_score).limit(10):
