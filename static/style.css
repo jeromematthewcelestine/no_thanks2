@@ -2,7 +2,19 @@
     box-sizing: border-box;
     font-family: Arial, sans-serif;
 }
-/* new game stuff */
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+    display: flex; 
+    flex-direction: column; 
+}
+
+body {
+    -webkit-text-size-adjust: 100%;
+}
+
 .new-game-container {
     display: flex;
     flex-direction: column;
@@ -68,27 +80,21 @@ grid-column: 2
   }
   
 
-body {
-    margin: 0;
-    padding: 0;
-    background-color: #fff;
-}
+
 
 h1 {
     font-family: 'Courier New', Courier, monospace;
 }
 
-.header {
+.header {   
     font-family: 'Courier New', Courier, monospace;
     font-weight: bold;
     color: white;
     display: grid;
-    grid-template-columns: 50% 50%;
     width: 100%;
     background-color: black;
     padding: 5px;
-    margin: 0px 0px 15px 0px;
-    font-size: 1rem;
+    margin: 0px 0px 1rem 0px;
 }
 .header-left {
     font-family: 'Courier New', Courier, monospace;
@@ -97,14 +103,12 @@ h1 {
     text-align: left;
 }
 .header-right {
-    font-size: 1rem;
+    font-size: 0.8rem;
     grid-column: 2;
-
     font-family: 'Courier New', Courier, monospace;
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
-    height: 100%;
     align-items: center;
 }
 .header a {
@@ -117,10 +121,11 @@ h1 {
 
 /* Styling for the player area */
 .player {
+    font-size: 0.8rem;
     border: 1px dashed gray;
-    border-radius: 8px;
-    padding: 5px 30px;
-    margin: 10px;
+    border-radius: 0.5rem;
+    padding: 0.3rem 1rem;
+    margin: 0.6rem;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -128,13 +133,7 @@ h1 {
     align-items: center;
 }
 
-.player-info {
-    grid-column: 1;
-    display: flex;
-    flex-direction:row;
-    justify-content: flex-start;
-    align-items: center;
-}
+
 
 .active-player {
     background-color: beige;
@@ -150,17 +149,36 @@ h1 {
     justify-self: start;
 }
 
-/* Styling for the player name */
 .player-name {
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: bold;
     /* margin-bottom: 10px; */
     text-align: left;
-    width: 100px;
+    width: 4rem;
 }
 
-.player-name-0 {
+@media (max-width: 600px) {
+    .player-info {
+        grid-column: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+    }
+}
 
+@media (min-width: 601px) {
+    .player-info {
+        grid-column: 1;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
+    }
+}
+
+
+.player-name-0 {
     color: red;
 }
 #loading-spinner {

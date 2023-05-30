@@ -402,6 +402,9 @@ def stats():
 
     return render_template('stats.html', stats_data=stats_data, low_scores=low_scores)
 
+@app.route('/test')
+def test():
+    return render_template('test.html')
 
 def create_mcts_state(mcts_player, game_state, active_player_id):
     coins = [player["chips"] for player in game_state["players"]]
