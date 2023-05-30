@@ -29,23 +29,22 @@ form#new-game-form {
 #num-ai-players-input {
     grid-row: 2;
 }
-#
 
 label {
     text-align: right;
-  }
+}
   
 input[type="text"],
 input[type="radio"],
 button[type="submit"] {
-padding: 5px;
-border-radius: 5px;
-border: 1px solid #ccc;
-font-size: 14px;
-grid-column: 2;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    grid-column: 2;
 }
   
-  button[type="submit"] {
+button[type="submit"] {
     background-color: #007bff;
     color: #fff;
     cursor: pointer;
@@ -57,11 +56,11 @@ grid-column: 2;
     background-color: #0069d9;
   }
   
-  input[type="radio"] {
-    margin-left: 5px;
-    margin-right: 5px;
-    grid-column: 2
-  }
+input[type="radio"] {
+margin-left: 5px;
+margin-right: 5px;
+grid-column: 2
+}
   
   input[type="radio"] + label {
     grid-column: 2;
@@ -89,14 +88,16 @@ h1 {
     background-color: black;
     padding: 5px;
     margin: 0px 0px 15px 0px;
+    font-size: 1rem;
 }
 .header-left {
     font-family: 'Courier New', Courier, monospace;
-    font-size: 18pt;
+    font-size: 1rem;
     grid-column: 1;
     text-align: left;
 }
 .header-right {
+    font-size: 1rem;
     grid-column: 2;
 
     font-family: 'Courier New', Courier, monospace;
@@ -147,13 +148,11 @@ h1 {
     flex-direction: row;
     flex-wrap: wrap;
     justify-self: start;
-    /* justify-content: flex-start; */
-    /* align-items: center; */
 }
 
 /* Styling for the player name */
 .player-name {
-    font-size: 18px;
+    font-size: 1.2rem;
     font-weight: bold;
     /* margin-bottom: 10px; */
     text-align: left;

@@ -53,27 +53,6 @@ class PlayerTurnBanner extends React.Component {
   }
 }
 
-
-
-
-
-// class GameLog extends React.Component {
-
-//   render() {
-
-//     const messageItems = this.props.game_state.messages.slice(0).reverse().map((message, idx) => 
-//       <div key={idx}>{message}</div>
-//     );
-    
-    
-//     return (
-//       <div className="log">
-//         {messageItems}
-//       </div>)
-
-//   }
-// }
-
 class CommonArea extends React.Component {
 
   render() {
