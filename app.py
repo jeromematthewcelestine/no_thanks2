@@ -421,4 +421,4 @@ def create_mcts_legal_actions(legal_actions):
     return [action_to_mcts[action] for action in legal_actions]
 
 if __name__ == '__main__':
-    app.run(port = 7001, debug=True)
+    app.run(host = "0.0.0.0", port = 7001, debug=True)
