@@ -1,4 +1,4 @@
-class PlayerTurnBanner extends React.Component {
+class InstructionBanner extends React.Component {
   render() {
     const { game_state, active_player_id, makeMove, newGame, legal_actions } = this.props;
     const activePlayer = game_state.players.find(player => player.id === active_player_id);
@@ -19,7 +19,7 @@ class PlayerTurnBanner extends React.Component {
     if (legal_actions && isHumanPlayer && legal_actions.includes('PAY_CHIP')) {
       you_must_message = 
       <div>
-        <span className={playerNameSpanClass}>{playerName}</span>, it is your turn. You must{" "}
+        <span className={playerNameSpanClass}>{playerName}</span>, it is your turn. <br/>You must{" "}
         <button className="banner-button" onClick={() => makeMove('PAY_CHIP')}>PASS</button> or
         <button className="banner-button" onClick={() => makeMove('TAKE_CARD')}>TAKE CARD</button>.
       </div>
@@ -27,7 +27,7 @@ class PlayerTurnBanner extends React.Component {
       if (legal_actions && isHumanPlayer) {
         you_must_message =
         <div>
-          <span className={playerNameSpanClass}>{playerName}</span>, it is your turn. You must
+          <span className={playerNameSpanClass}>{playerName}</span>, it is your turn. <br/>You must
           <button className="banner-button" onClick={() => makeMove('TAKE_CARD')}>TAKE CARD</button>.
         </div>
       }
@@ -59,7 +59,10 @@ class CommonArea extends React.Component {
     let current_card;
 
     if (this.props.game_state.table_card) {
-      current_card = <div className="card">{this.props.game_state.table_card}</div>
+      const card_div_class = 'card card-value-' + this.props.game_state.table_card + ' ';
+      current_card = (<div className={card_div_class}>
+          <div className="card-text">{this.props.game_state.table_card}</div> 
+        </div>)
     } else {
       current_card = <div className="card card-empty"></div>
     }
@@ -72,16 +75,17 @@ class CommonArea extends React.Component {
         {this.props.game_state.deck.length >= 2 &&
         <div className="card deck-card"></div>}
         {this.props.game_state.deck.length >= 1 ?
-          (<div className="card deck-card">{this.props.game_state.deck.length}</div>) :
-          (<div className="card card-empty">{this.props.game_state.deck.length}</div>)}
+          (<div className="card deck-card"><div className="card-count">{this.props.game_state.deck.length}</div></div>) :
+          (<div className="card card-empty"><div className="card-count">{this.props.game_state.deck.length}</div></div>)}
       </div>
 
       {current_card}
 
-      <div className="chips-counter">
-        {this.props.game_state.table_chips}
+      <div className="commonArea_chipsArea">
+        <div className="chips-counter">
+          {this.props.game_state.table_chips}
+        </div>
       </div>
-
     </div>)
   }
 }
@@ -99,37 +103,60 @@ class PlayerInfo extends React.Component {
     if (this.props.player.id === this.props.game_state.active_player_id && !this.props.game_state.is_game_over) {
       is_active = true;
       if (this.props.player.id !== this.props.game_state.human_player_id) {
-        profile_image = <img src="/static/Spinner-2.4s-34px.svg" id="loading-spinner" height="24" width="24"></img>
+        profile_image = <img src="/static/Spinner-2.4s-34px.svg" id="loading-spinner" height="24"></img>
       } else {
-        profile_image = <img src="/static/user-filled-svgrepo-com.svg" height="24" width="24" id="loading-spinner"></img>
+        profile_image = <img src="/static/user-filled-svgrepo-com.svg" height="24" id="loading-spinner"></img>
       }
     } else {
       is_active = false;
       if (this.props.player.id !== this.props.game_state.human_player_id) {
-        profile_image = <img src="/static/robot-icon.svg" id="loading-spinner" height="24" width="24"></img>
+        profile_image = <img src="/static/robot-icon.svg" id="loading-spinner" height="24" ></img>
       } else {
-        profile_image = <img src="/static/user-filled-svgrepo-com.svg" height="24" width="24" id="loading-spinner"></img>
+        profile_image = <img src="/static/user-filled-svgrepo-com.svg" height="24" id="loading-spinner"></img>
       }
     }
 
-    const cardsList = player.cards.map((card, index) => {
-      let card_div_class = 'card'
-      if (player.last_card == card) card_div_class += ' last-chosen'
+    const cardsList = player.card_groups.map((card_group) => {
 
-      let zIndex = 50
-      if (index > 0 && this.isConsecutive(player.cards[index - 1], card)) {
-        card_div_class += ' overlapping-card';
-        zIndex = (50 - index)
-      } else {
-        zIndex = 50
+      if (card_group && card_group.length == 0) {
+        return (<div className="card-group"></div>)
       }
 
-      return (
-          <div className={card_div_class} key={index} style={{"zIndex": zIndex}}>
-            <div className="card-text">{card}</div> 
+      const cards = card_group.map((card, index) => {
+        const cardClass = 'card ' + (index > 0 ? ' underlapping-card' : '');
+        const zIndex = 50 - index;
+        
+        return (
+          <div className={cardClass} style={{"zIndex": zIndex}}>
+            {card}
           </div>
-        )
+        );
+      });
+
+      return (
+        <div className="card-group">
+          {cards}
+        </div>)
     });
+
+    // const cardsList = player.cards.map((card, index) => {
+    //   let card_div_class = 'card card-value-' + card + ' ';
+    //   if (player.last_card == card) card_div_class += ' last-chosen'
+
+    //   let zIndex = 50
+    //   if (index > 0 && this.isConsecutive(player.cards[index - 1], card)) {
+    //     card_div_class += ' overlapping-card';
+    //     zIndex = (50 - index)
+    //   } else {
+    //     zIndex = 50
+    //   }
+
+    //   return (
+    //       <div className={card_div_class} key={index} style={{"zIndex": zIndex}}>
+    //         <div className="card-text">{card}</div> 
+    //       </div>
+    //     )
+    // });
 
     let chips_display;
     if (player.id == this.props.game_state.human_player_id || this.props.game_state.is_game_over) {
@@ -139,25 +166,37 @@ class PlayerInfo extends React.Component {
     }
 
     return (
-      <div className={`player${is_active ? ' active-player' : ''}`}>
-        <div className={`player-info${is_active ? ' active-player' : ''}`}>
-        {profile_image}
-          <div className={`player-name${is_active ? ' active-player' : ''}`}>
-            <span className={`player-name-${this.props.player.id}`}>
+      <div className={`playerArea ${is_active ? ' playerAreaActive' : ''}`}>
+        <div className="playerArea_TopArea">
+          <div className="playerArea_TopArea_ProfileImageArea">
+            {profile_image}
+          </div>
+          <div className="playerArea_TopArea_NameArea">
+            <span className={`player-name player-name-${this.props.player.id}`}>
               {player.name}
             </span>
           </div>
-          {(this.props.game_state.is_game_over && <div className="score-container">
-            <img src="/static/star.svg" height="34" width="34" className="score-icon"></img>
-            <div className="score-text-container">
-              <span className={(player.final_status=="winner"?"score-bold":"score-normal")}>{player.score}</span>
+          <div className="playerArea_TopArea_ChipsArea">
+            <div className="chips-counter">{chips_display}</div>
+          </div>
+
+          {(this.props.game_state.is_game_over &&
+          <div className="playerArea_TopArea_ScoreArea">
+            <div className="score-container">
+              <img src="/static/star.svg" height="34" width="34" className="score-icon"></img>
+              <div className="score-text-container">
+                <span className={(player.final_status=="winner"?"score-bold":"score-normal")}>{player.score}</span>
+              </div>
             </div>
           </div>)}
-          <div className="chips-counter">{chips_display}</div>
+
         </div>
-        <div className="player-cards">{cardsList}</div>
+
+      <div className="playerArea_BottomArea">
+        <div className="playerArea_BottomArea_CardsArea">{cardsList}</div>
       </div>
-      )
+    </div>
+    )
   }
 }
 
@@ -260,7 +299,7 @@ class GameState extends React.Component {
         <div className="gameArea">
           <div className="gameWrapper">
           
-            <PlayerTurnBanner
+            <InstructionBanner
               game_state={game_state} 
               active_player_id={active_player_id}
               makeMove={this.makeMove.bind(this)}

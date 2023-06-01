@@ -80,10 +80,10 @@ def initialize_game(player_name = "Bob", num_opponents = 3):
     print("len omitted_cards", len(omitted_cards))
     table_card = deck.pop()
     
-    human_player = {"type": "human", "name": player_name, "cards": [], "chips": start_chips}
+    human_player = {"type": "human", "name": player_name, "cards": [], "card_groups": [], "chips": start_chips}
     players = [human_player]
     for i in range(num_opponents):
-        ai_player = {"type": "ai01", "name": f"Player {i+1}", "cards": [], "chips": start_chips}
+        ai_player = {"type": "ai01", "name": f"Player {i+1}", "cards": [], "card_groups": [], "chips": start_chips}
         players.append(ai_player)
 
     # randomize player order
@@ -332,6 +332,15 @@ def calculate_score(player):
 
     return score
 
+def make_card_groups(cards):
+    card_groups = []
+    for card in cards:
+        if card_groups and card_groups[-1][-1] == card - 1:
+            card_groups[-1].append(card)
+        else:
+            card_groups.append([card])
+    return card_groups
+
 def do_action(game_state, action_type):
     active_player_id = game_state["active_player_id"]
 
@@ -351,6 +360,7 @@ def do_action(game_state, action_type):
         game_state["table_chips"] = 0
         game_state["players"][active_player_id]["cards"].append(game_state["table_card"])
         game_state["players"][active_player_id]["cards"].sort()
+        game_state["players"][active_player_id]["card_groups"] = make_card_groups(game_state["players"][active_player_id]["cards"])
         game_state["players"][active_player_id]["last_card"] = game_state["table_card"]
 
         # game_state["messages"].append(f"Player {active_player_id} took the {game_state['table_card']} card.")
@@ -368,6 +378,8 @@ def do_action(game_state, action_type):
             record_completed_game(game_state)
 
     return game_state
+
+
 
 @app.route('/stats')
 def stats():
