@@ -20,7 +20,7 @@ class InstructionBanner extends React.Component {
       you_must_message = 
       <div>
         <span className={playerNameSpanClass}>{playerName}</span>, it is your turn. <br/>You must{" "}
-        <button className="banner-button" onClick={() => makeMove('PAY_CHIP')}>PASS</button> or
+        <button className="banner-button" onClick={() => makeMove('PAY_CHIP')}>PASS</button>{" "}or{" "}
         <button className="banner-button" onClick={() => makeMove('TAKE_CARD')}>TAKE CARD</button>.
       </div>
     } else {
@@ -40,7 +40,7 @@ class InstructionBanner extends React.Component {
         
         {isGameOver ? (
           <div>Game over. <span className={winnerNameSpanClass}>{winner.name}</span> wins!{" "}
-            <button className="banner-button" onClick={() => newGame()}>New Game</button>
+            <button className="banner-button" onClick={() => newGame()}>NEW GAME</button>
           </div>
         ) : isHumanPlayer ? (
           you_must_message
@@ -123,7 +123,7 @@ class PlayerInfo extends React.Component {
       }
 
       const cards = card_group.map((card, index) => {
-        const cardClass = 'card ' + (index > 0 ? ' underlapping-card' : '');
+        const cardClass = 'card ' + 'card-value-' + card + ' ' + (index > 0 ? ' underlapping-card' : '');
         const zIndex = 50 - index;
         
         return (
