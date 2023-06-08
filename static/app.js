@@ -36,7 +36,7 @@ class InstructionBanner extends React.Component {
 
 
     return (
-      <div className="player-turn-banner">
+      <div className="playerTurnBanner">
         
         {isGameOver ? (
           <div>Game over. <span className={winnerNameSpanClass}>{winner.name}</span> wins!{" "}
@@ -69,20 +69,22 @@ class CommonArea extends React.Component {
 
   return (
     <div className="commonArea">
-      <div className="deck">
+      <div className="commonArea_deckArea">
         {this.props.game_state.deck.length >= 3 &&
-        <div className="card deck-card"></div>}
+        <div className="card deck-card deck-card-under"></div>}
         {this.props.game_state.deck.length >= 2 &&
-        <div className="card deck-card"></div>}
+        <div className="card deck-card deck-card-under"></div>}
         {this.props.game_state.deck.length >= 1 ?
-          (<div className="card deck-card"><div className="card-count">{this.props.game_state.deck.length}</div></div>) :
+          (<div className="card deck-card "><div className="card-count">{this.props.game_state.deck.length}</div></div>) :
           (<div className="card card-empty"><div className="card-count">{this.props.game_state.deck.length}</div></div>)}
       </div>
 
-      {current_card}
+      <div className="commonArea_cardArea">
+        {current_card}
+      </div>
 
       <div className="commonArea_chipsArea">
-        <div className="chips-counter">
+        <div className="chipsCounter">
           {this.props.game_state.table_chips}
         </div>
       </div>
@@ -123,7 +125,8 @@ class PlayerInfo extends React.Component {
       }
 
       const cards = card_group.map((card, index) => {
-        const cardClass = 'card ' + 'card-value-' + card + ' ' + (index > 0 ? ' underlapping-card' : '');
+        const cardClass = 'card ' + 'card-value-' + card + ' ' + 
+          (index > 0 ? ' underlapping-card ' : '') + (player.last_card == card ? ' last-chosen' : '');
         const zIndex = 50 - index;
         
         return (
@@ -177,7 +180,7 @@ class PlayerInfo extends React.Component {
             </span>
           </div>
           <div className="playerArea_TopArea_ChipsArea">
-            <div className="chips-counter">{chips_display}</div>
+            <div className="chipsCounter">{chips_display}</div>
           </div>
 
           {(this.props.game_state.is_game_over &&
@@ -185,7 +188,7 @@ class PlayerInfo extends React.Component {
             <div className="score-container">
               <img src="/static/star.svg" height="34" width="34" className="score-icon"></img>
               <div className="score-text-container">
-                <span className={(player.final_status=="winner"?"score-bold":"score-normal")}>{player.score}</span>
+                <span className={(player.final_status=="winner"?"score-winner":"score-loser")}>{player.score}</span>
               </div>
             </div>
           </div>)}
@@ -297,7 +300,7 @@ class GameState extends React.Component {
     return (
       <div className="container">
         <div className="gameArea">
-          <div className="gameWrapper">
+          
           
             <InstructionBanner
               game_state={game_state} 
@@ -310,7 +313,7 @@ class GameState extends React.Component {
           
             {playerInfos}
           
-          </div>
+          
         
         </div>
       </div>
