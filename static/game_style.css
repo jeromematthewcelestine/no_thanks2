@@ -252,6 +252,7 @@
 }
   
 .banner-button {
+    font-size: 1rem;
     font-weight: 700;
     background-color: red;
     border-radius: 5px;
