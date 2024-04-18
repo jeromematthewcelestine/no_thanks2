@@ -18,25 +18,38 @@
   <h1 style="text-align: center;">Game Stats</h1>
 
   <table class="table table-striped">
-    <thead>
-      <tr>
-        <th></th>
-        <th>Played</th>
-        <th>Player Wins</th>
-        <th>NoThanksBot Wins</th>
-        <th>Player Win Rate</th>
-      </tr>
-    </thead>
     <tbody>
-      {% for stats1 in stats_data %}
+      
         <tr>
-          <td>{{ stats1.player_count }} Players</td>
-          <td>{{ stats1.n_games }}</td>
-          <td>{{ stats1.human_wins }}</td>
-          <td>{{ stats1.ai_wins }}</td>
-          <td>{{ stats1.win_rate }} </td>
+          <th></th>
+          {% for stats1 in stats_data %}
+            <th>{{ stats1.player_count }} Players</th>
+          {% endfor %}
         </tr>
-      {% endfor %}
+        <tr>
+          <td>Games played</td>
+          {% for stats1 in stats_data %}
+            <td>{{ stats1.n_games }}</td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td>Player wins</td>
+          {% for stats1 in stats_data %}
+            <td>{{ stats1.human_wins }}</td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td>Bot wins</td>
+          {% for stats1 in stats_data %}
+            <td>{{ stats1.ai_wins }}</td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td>Player win rate</td>
+          {% for stats1 in stats_data %}
+            <td>{{ stats1.win_rate }} </td>
+          {% endfor %}
+        </tr>
     </tbody>
   </table>
 
@@ -45,7 +58,7 @@
   <table class="table table-striped">
     <thead>
       <tr>
-        <th></th>
+        <th>Rank</th>
         <th>Player</th>
         <th>Date</th>
         <th>Score</th>

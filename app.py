@@ -7,9 +7,22 @@ from datetime import datetime
 import os, psutil
 import sys
 from MCTSPlayerOnline import MCTSPlayerOnline
+from no_thanks import NoThanksConfig
 
-mcts_player_3p = MCTSPlayerOnline(n_players = 3, thinking_time = 0.3)
-mcts_player_4p = MCTSPlayerOnline(n_players = 4, thinking_time = 0.3)
+kMinCard = 1
+kMaxCard = 5
+kNumOmitCards = 1
+kNumCoins = 2
+
+config = NoThanksConfig(
+    min_card = kMinCard,
+    max_card = kMaxCard,
+    n_omit_cards = kNumOmitCards,
+    start_coins = kNumCoins
+)
+
+mcts_player_3p = MCTSPlayerOnline(n_players = 3, thinking_time = 0.3, config = config)
+mcts_player_4p = MCTSPlayerOnline(n_players = 4, thinking_time = 0.3, config = config)
 
 if "DATABASE_URL" in os.environ:
     DATABASE_URL = os.environ['DATABASE_URL']
@@ -69,11 +82,11 @@ def record_completed_game(game_state):
 
 def initialize_game(player_name = "Bob", num_opponents = 3):
 
-    deck = list(range(3, 35+1))
+    deck = list(range(kMinCard, kMaxCard+1))
     random.shuffle(deck)
 
-    start_chips = 11
-    omit_cards = 9
+    start_chips = kNumCoins
+    omit_cards = kNumOmitCards
 
     table_chips = 0
     omitted_cards = [deck.pop() for _ in range(omit_cards)]
