@@ -9,10 +9,10 @@ import sys
 from MCTSPlayerOnline import MCTSPlayerOnline
 from no_thanks import NoThanksConfig
 
-kMinCard = 1
-kMaxCard = 5
-kNumOmitCards = 1
-kNumCoins = 2
+kMinCard = 3
+kMaxCard = 35
+kNumOmitCards = 9
+kNumCoins = 11
 
 config = NoThanksConfig(
     min_card = kMinCard,
