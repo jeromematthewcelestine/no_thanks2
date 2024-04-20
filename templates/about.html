@@ -11,16 +11,23 @@
       let game_id = {{game_id}};
     </script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='page_style.css') }}">
 </head>
 <body>
   {% include "header.html" %}
-  <h1>About</h1>
-  <p>This is a demonstration of an AI bot that plays the card game <a href="https://boardgamegeek.com/boardgame/12942/no-thanks">No Thanks!</a>.</p>
-  <p>The bot uses a variant of the <a href="https://en.wikipedia.org/wiki/Monte_Carlo_tree_search">Monte Carlo tree search</a> algorithm.
-    Code for the bot is available on <a href="https://github.com/jeromematthewcelestine/mcts_no_thanks">Github</a>.</p>
-  <p>Note that while the rules for <i>No Thanks!</i> advise players to keep their chips hidden from their opponents,
-    nothing stops a player from keeping track of other players' chip counts.
-    Therefore, in this implementation, I allow the bots to observe and rely on all players' chip counts.</p>
+
+  <div class="content_container">
+    <div class="content_div">
+    <h1>About</h1>
+    <p>This is a demonstration of an AI bot that plays the card game <a href="https://boardgamegeek.com/boardgame/12942/no-thanks">No Thanks!</a>.</p>
+    <p>The bot uses a variant of the <a href="https://en.wikipedia.org/wiki/Monte_Carlo_tree_search">Monte Carlo tree search</a> algorithm.
+      Code for the bot is available on <a href="https://github.com/jeromematthewcelestine/mcts_no_thanks">Github</a>.</p>
+    <p>Note that while the rules for <i>No Thanks!</i> advise players to keep their chips hidden from their opponents,
+      nothing stops a player from keeping track of other players' chip counts.
+      Therefore, in this implementation, I allow the bots to observe and rely on all players' chip counts.</p>
+    <p><a href="https://www.jeromewilliams.net/">Jerome Williams</a>, 2023-24</p>
+    </div>
+  </div>
   <script type="text/babel" src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
